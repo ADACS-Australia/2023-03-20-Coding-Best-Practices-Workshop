@@ -44,3 +44,49 @@ Once you have an account you'll need to join the group FIXME.
 - ssh login
 - command line text editor ([emacs](https://www.linuxfordevices.com/tutorials/linux/emacs-editor-tutorial)/[vim](https://www.tutorialspoint.com/vim/index.htm#)/[nano](https://www.linuxfordevices.com/tutorials/linux/nano-editor-in-linux))
 - Python scripting [SWC Lesson](http://swcarpentry.github.io/python-novice-gapminder/), [ADACS Lesson](https://adacs.org.au/courses/introduction-to-python/)
+
+## Engagement
+
+This workshop is developed for three main delivery methods:
+1. Facilitated, in person, at UNSW
+2. Facilitated, online, in parallel with (1)
+3. Self-paced, online, via this website.
+
+This workshop is all about learning by doing.
+We will be engaging in live coding type exercises for most of the workshop, and we will set challenges and exercises for you to complete in groups.
+The more you engage with your fellow learners and the more questions that you ask, the more that you will get out of this workshop.
+
+We will be using sticky notes for in-person participants to indicate their readiness to move on: please stick them on your laptop screen to indicate if you need help or are done and ready to move ahead.
+For those joining online we'll be using emotes to indicate the same.
+
+We will use a shared document ([etherpad](https://pad.carpentries.org/2023-03-20CodingSydney)) to manage and record many of our interactions.
+
+
+## Conduct
+
+This workshop will be an inclusive and equitable space, which respects:
+- the lived experience of it's attendees,
+- the right for all to learn, and 
+- the fact that learning means making mistakes.
+
+We ask that you follow these guidelines:
+
+- Behave professionally. Harassment and sexist, racist, or exclusionary comments or jokes are not appropriate.
+- All communication should be appropriate for a professional audience including people of many different backgrounds. 
+- Sexual or sexist language and imagery is not appropriate.
+- Be considerate and respectful to others.
+- Do not insult or put down other attendees.
+- Critique ideas rather than individuals.
+- Do not engage in tech-shaming.
+
+See the [ASA2022 code of conduct](https://www.asa2022.org/code-of-conduct) and the [Software Carpentries code of conduct](https://docs.carpentries.org/topic_folders/policies/code-of-conduct.html) for more information.
+
+
+
+> ## Introduce yourselves
+> ![IceBreaker](https://ichef.bbci.co.uk/news/976/cpsprodpb/D6B5/production/_123956945_225107a3-318d-4c2e-b040-2dcd03c4698a.jpg){: width="400"}
+> 
+> Introduce yourself to your peers by telling us your name, a band you are listening to at the moment, and your favorite kind of pet.
+> 
+> Do this in person and via the etherpad.
+{: .challenge}
