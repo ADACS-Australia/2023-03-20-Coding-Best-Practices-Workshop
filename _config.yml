@@ -154,3 +154,12 @@ exclude:
 
 # Turn on built-in syntax highlighting.
 highlighter: rouge
+
+episode_order:
+  - Setup
+  - BestPracticesInComputing
+  - ProofOfConcept
+  - ProjectStructure
+  - VersionControl
+  - CodingStyle
+  - Testing
