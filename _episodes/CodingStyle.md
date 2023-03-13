@@ -11,8 +11,6 @@ keypoints:
 ---
 
 ## Best Practice - Coding Style
-
-## Style Guides
 ```
 Programs must be written for people to read, and only incidentally for machines to execute.
 ```
@@ -129,33 +127,6 @@ Notice that `pylint` really doesn't like lines like `from math import *`.
 
 
 TODO - more explainers for each line, and then how to fix it.
-
-
-
-## Documentation and comments
-Python allows / encourages documentation via docstrings.
-
-Documentation is for people using the code (regular folks).
-Documentation describes the ingredients and what kind of sausages are made.
-
-Comments are for people reading the code (ie developers and future you).
-Comments are about the sausage making process (ew!).
-
-
-| Information           | Audience                                |
-| --------------------- | --------------------------------------- |
-| Comments              | Developers, people who read source code |
-| Docstrings            | Developers, users                       |
-| Wiki                  | Users, developers                       |
-| mycode.readthedocs.io | Users                                   |
-
-
-Consider creating a command line interface (CLI) for your code and providing an option of `--help` that gives users a quick into to the use of your code.
-
-```
-# TODO CLI example
-```
-{: .language-python}
 
 ## DRY coding principle
 

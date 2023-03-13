@@ -162,4 +162,5 @@ episode_order:
   - ProjectStructure
   - VersionControl
   - CodingStyle
+  - Documentation
   - Testing
