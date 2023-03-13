@@ -5,7 +5,7 @@
 import math
 import numpy as np
 from mpi4py import MPI
-import sys
+import os
 import glob
 
 nsrc = 1_000_000
@@ -55,11 +55,12 @@ if __name__ == "__main__":
     group_size = nsrc // size
     make_positions(ra, dec, group_size, outfile)
     
-    # collate 
+    # Select one process to collate all the files
     if rank == 0:
         files = sorted(glob.glob("{0}_part*".format(outfile)))
         with open(outfile,'w') as wfile:
             for rfile in files:
                 for l in open(rfile).readlines():
                     print(l.strip(),file=wfile)
+                # os.remove(rfile)
 
