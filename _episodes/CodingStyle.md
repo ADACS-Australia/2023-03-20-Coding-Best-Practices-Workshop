@@ -9,32 +9,8 @@ objectives:
 keypoints:
 - "TODO"
 ---
-<!-- See https://docs.google.com/presentation/d/11fOcEBwyAwUchFocbTopph9k3IPeTirCe04HJC8lXkM/edit#slide=id.g5ad883c8fc_0_0 -->
 
-## Naming conventions
-Consistent and meaningful naming of files and folders can make everyone’s life easier. 
-For example to represent Date Location Sensor a general naming convention could be:
-`YYYYMMDD_SiteA_SensorB.CSV`
-
-Some characters may have special meaning to the operating system so avoid using these characters when you are naming files.
-These characters include the following: `/ \ " ' * ; - ? [ ] ( ) ~ ! $ { } &lt > # @ & |` space tab newline
-
-Using a date format of `YYYYMMDD` will have the added bonus that files sorted alphabetically will be also sorted by date.
-Similarly, you should consider zero-padding your integers in file names so that `File.v12.txt`, comes after `File.v02.txt`, rather than before `File.v2.txt`.
-
-
-Within your code:
-Use words! Be verbose but not needlessly so.
-- nouns for classes and variables 
-  - CamelCaseForClasses
-- verbs for functions 
-  - Underscores_for_functions
-- ALL_CAPS_FOR_STATIC_VARIABLES
-- _private_function_or_variable (not part of a public API)
-
-Loop iterators are commonly just `i, j, k` which is not very descriptive, but in many cases this can be appropriate.
-[For example, when you are using `i,j,k` as array indexes.]
-
+## Best Practice - Coding Style
 
 ## Style Guides
 ```
@@ -60,11 +36,101 @@ TODO - linters
 
 `pylint` will give you a summary of where your code doesn't conform to the PEP8 standard.
 
+```
+$ pylint poc.py
+************* Module poc
+poc.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+poc.py:8:0: W0622: Redefining built-in 'pow' (redefined-builtin)
+poc.py:4:0: C0103: Constant name "ra" doesn't conform to UPPER_CASE naming style (invalid-name)
+poc.py:5:0: C0103: Constant name "dec" doesn't conform to UPPER_CASE naming style (invalid-name)
+poc.py:8:0: W0401: Wildcard import math (wildcard-import)
+poc.py:8:0: C0413: Import "from math import *" should be placed at the top of the module (wrong-import-position)
+poc.py:17:0: C0103: Constant name "nsrc" doesn't conform to UPPER_CASE naming style (invalid-name)
+poc.py:20:0: W0401: Wildcard import random (wildcard-import)
+poc.py:20:0: C0413: Import "from random import *" should be placed at the top of the module (wrong-import-position)
+poc.py:29:4: W1514: Using open without explicitly specifying an encoding (unspecified-encoding)
+poc.py:32:10: C0209: Formatting a regular string which could be a f-string (consider-using-f-string)
+poc.py:29:4: R1732: Consider using 'with' for resource-allocating operations (consider-using-with)
+poc.py:8:0: W0614: Unused import(s) acos, acosh, asin, asinh, atan, atan2, atanh, ceil, comb, copysign, cosh, degrees, dist, e, erf, erfc, exp, expm1, fabs, factorial, floor, fmod, frexp, fsum, gamma, gcd, hypot, inf, isclose, isfinite, isinf, isnan, isqrt, ldexp, lgamma, log, log10, log1p, log2, modf, nan, perm, pow, prod, radians, remainder, sin, sinh, sqrt, tan, tanh, tau and trunc from wildcard import of math (unused-wildcard-import)
+poc.py:20:0: W0614: Unused import(s) NV_MAGICCONST, TWOPI, LOG4, SG_MAGICCONST, BPF, RECIP_BPF, Random, SystemRandom, seed, random, triangular, randint, choice, randrange, sample, shuffle, choices, normalvariate, lognormvariate, expovariate, vonmisesvariate, gammavariate, gauss, betavariate, paretovariate, weibullvariate, getstate, setstate and getrandbits from wildcard import of random (unused-wildcard-import)
 
-## Python idioms
+------------------------------------------------------------------
+Your code has been rated at 2.63/10
+```
+{: .output}
 
-Avoid `import *` like the plague.
-Use `from math import sqrt` or, even better, `import math` and then `math.sqrt` as required.
+Thats a fairly poor rating, but then again, the code isn't very well structured.
+Each of the lines that have been identified come with an error code which you can get more information from pytlint:
+
+```
+pylint --list-msgs | less
+```
+{: .bash}
+And then press `/` for search, and type the error code such as W0401.
+
+## Structuring our code
+
+Let's take a look at our proof of concept code and point out some of the things we are doing that make it hard for us to read, and might be causing problems in the future.
+I've interspersed the code with comments that come from pylint:
+```
+# Determine Andromeda location in ra/dec degrees 
+# ^- Missing module docstring (missing-module-docstring)
+
+# from wikipedia
+ra = '00:42:44.3' 
+# ^- Constant name "ra" doesn't conform to UPPER_CASE naming style (invalid-name)
+dec = '41:16:09'  
+# ^- Constant name "dec" doesn't conform to UPPER_CASE naming style (invalid-name)
+
+# convert to decimal degrees
+from math import *  
+# ^- Redefining built-in 'pow' (redefined-builtin)
+# ^- Wildcard import math (wildcard-import)
+# ^- Import "from math import *" should be placed at the top of the module (wrong-import-position)
+# ^- W0614: Unused import(s) acos, acosh, asin, asinh, atan, atan2, atanh, ceil, comb, copysign, cosh, degrees, dist, e, erf, erfc, exp, expm1, fabs, factorial, floor, fmod, frexp, fsum, gamma, gcd, hypot, inf, isclose, isfinite, isinf, isnan, isqrt, ldexp, lgamma, log, log10, log1p, log2, modf, nan, perm, pow, prod, radians, remainder, sin, sinh, sqrt, tan, tanh, tau and trunc from wildcard import of math (unused-wildcard-import)
+
+d, m, s = dec.split(':')
+dec = int(d)+int(m)/60+float(s)/3600
+
+h, m, s = ra.split(':')
+ra = 15*(int(h)+int(m)/60+float(s)/3600)
+ra = ra/cos(dec*pi/180)
+
+nsrc = 1_000_000
+# ^- Constant name "nsrc" doesn't conform to UPPER_CASE naming style (invalid-name)
+
+# make 1000 stars within 1 degree of Andromeda
+from random import *
+# ^- Wildcard import math (wildcard-import)
+# ^- Import "from math import *" should be placed at the top of the module (wrong-import-position)
+# ^- Unused import(s) NV_MAGICCONST, TWOPI, LOG4, SG_MAGICCONST, BPF, RECIP_BPF, Random, SystemRandom, seed, random, triangular, randint, choice, randrange, sample, shuffle, choices, normalvariate, lognormvariate, expovariate, vonmisesvariate, gammavariate, gauss, betavariate, paretovariate, weibullvariate, getstate, setstate and getrandbits from wildcard import of random (unused-wildcard-import)
+
+ras = []
+decs = []
+for i in range(nsrc):
+    ras.append(ra + uniform(-1,1))
+    decs.append(dec + uniform(-1,1))
+
+
+# now write these to a csv file for use by my other program
+f = open('catalog.csv','w')
+# ^- Using open without explicitly specifying an encoding (unspecified-encoding)
+# ^- Consider using 'with' for resource-allocating operations (consider-using-with)
+
+print("id,ra,dec", file=f)
+for i in range(nsrc):
+    print("{0:07d}, {1:12f}, {2:12f}".format(i, ras[i], decs[i]), file=f)
+    # ^- Formatting a regular string which could be a f-string (consider-using-f-string)
+
+```
+{: .language-python}
+
+Notice that `pylint` really doesn't like lines like `from math import *`.
+
+
+TODO - more explainers for each line, and then how to fix it.
+
+
 
 ## Documentation and comments
 Python allows / encourages documentation via docstrings.
@@ -108,23 +174,7 @@ Instead of remaking a solution from scratch (and having to test/debug/maintain i
 Have a look on [pypi.org](https://pypi.org/) for packages of interest, or ask you colleagues, or [stack overflow](https://stackoverflow.com/).
 
 
-## Test your code
-```
-Finding your bug is a process of confirming the many things that you believe are true — until you find one which is not true.
-```
-— Norm Matloff
-
-The only thing that people write less than documentation is test code.
-
-Pro-tip: Both documentation and test code is easier to write if you do it as part of the development process.
-
-Ideally:
-1. Write function definition and basic docstring
-2. Write function contents
-3. Write test to ensure that function does what the docstring claims.
-4. Update code and/or docstring until (3) is true.
-
-Exhaustive testing is rarely required or useful.
-Two main philosophies are recommended:
-1. Tests for correctness (eg, compare to known solutions)
-2. Tests to avoid re-introducing a bug (regression tests)
+> ## Use functions
+> - Update POC to use two functions: one to generate the positions, and one to save them to a file
+> - Have a very short "main" clause to run the code.
+{: .challenge}
