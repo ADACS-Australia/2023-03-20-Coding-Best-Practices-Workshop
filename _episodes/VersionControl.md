@@ -78,7 +78,7 @@ Lets make a start on our project by keeping that first proof of concept script u
 > ## Start a new project
 > - Move into the root directory for our project
 > - Initialize a git repository in this directory by typing `git init`
-> - Tell git that you want to track your `README.md` and `sim_stars.py` files using `git add <filename>`
+> - Tell git that you want to track your `README.md` and `sky_sim.py` files using `git add <filename>`
 > - Save your initial progress by creating a new commit to your repository via `git commit -m <message>`
 >   - The first commit message can be something simple like "initial version" or "proof of concept"
 > - Check that you have committed your progress by running `git log`

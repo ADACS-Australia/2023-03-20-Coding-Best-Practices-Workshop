@@ -60,7 +60,7 @@ Do not using sequential numbers (e.g., `result1.csv`, `result2.csv`) or a locati
 
 > ## Structure our project
 > - Create a new directory for your project with a name that makes sense to you
-> - Create a directory to store our scripts
-> - Save your initial python script as `sim_stars.py` and put it in the scripts directory
+> - Create a directory to store our scripts called `mymodule`
+> - Save your initial python script as `sky_sim.py` and put it in the module directory
 > - Create a `README.md` file and make a short note about what this project is about
 {: .challenge}
