@@ -163,4 +163,5 @@ episode_order:
   - VersionControl
   - CodingStyle
   - Documentation
+  - GitHub
   - Testing
