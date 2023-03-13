@@ -1,6 +1,3 @@
-#! /usr/bin/env python
-# Demonstrate that we can simulate a catalogue of stars on the sky
-
 # Determine Andromeda location in ra/dec degrees
 
 # from wikipedia
