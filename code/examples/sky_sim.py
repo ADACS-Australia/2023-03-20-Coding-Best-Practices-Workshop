@@ -3,6 +3,7 @@
 Simulate a catalog of stars near to the Andromeda constellation
 """
 
+import argparse
 import math
 import random
 
@@ -12,6 +13,13 @@ def get_radec():
     """
     Generate the ra/dec coordinates of Andromeda
     in decimal degrees.
+
+    Returns
+    -------
+    ra : float
+        The RA, in degrees, for Andromeda
+    dec : float
+        The DEC, in degrees for Andromeda
     """
     # from wikipedia
     andromeda_ra = '00:42:44.3'
@@ -39,11 +47,24 @@ def make_positions(ra,dec):
 
 
 if __name__ == "__main__":
-    ra, dec = get_radec()
+    parser = argparse.ArgumentParser(prog='sky_sim', prefix_chars='-')
+    parser.add_argument('--ra', dest = 'ra', type=float, default=None,
+                        help="Central ra (degrees) for the simulation location")
+    parser.add_argument('--dec', dest = 'dec', type=float, default=None,
+                        help="Central dec (degrees) for the simulation location")
+    parser.add_argument('--out', dest='out', type=str, default='catalog.csv',
+                        help='destination for the output catalog')
+    options = parser.parse_args()
+    if None in [options.ra, options.dec]:
+        ra, dec = get_radec()
+    else:
+        ra = options.ra
+        dec = options.dec
+    
     ras, decs = make_positions(ra,dec)
     # now write these to a csv file for use by my other program
-    with open('catalog.csv','w') as f:
+    with open(options.out,'w') as f:
         print("id,ra,dec", file=f)
         for i in range(NSRC):
             print(f"{i:07d}, {ras[i]:12f}, {decs[i]:12f}", file=f)
-    print("Wrote catalog.csv")
+    print(f"Wrote {options.out}")
