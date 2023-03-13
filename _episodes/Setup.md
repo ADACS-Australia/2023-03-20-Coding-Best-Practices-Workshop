@@ -40,6 +40,24 @@ See [these instructions](https://my.nci.org.au/mancini/signup/0) for how you can
 Once you have an account you'll need to join the group FIXME.
 
 ## Assumed knowledge
+This course assumes that you have basic proficiency in python.
+
+One of the main lessons for this workshop is to use version control for all your text based projects (papers / code).
+For this we will be using the git version control system, and in particular we will be using GitHub as the remote repository.
+
+Software requirements
+
+- Python 3.6 +
+- A integrated development environment ([IDE](https://en.wikipedia.org/wiki/Integrated_development_environment)) or text editor of choice
+  - We recommend [PyCharm](https://www.jetbrains.com/pycharm/) or [Visual Studio Code](https://code.visualstudio.com/)
+- An operating system which gives you a proper command line
+  - For windows this means using something like [gitbash](https://gitforwindows.org/), [WSL](https://docs.microsoft.com/en-us/windows/wsl/install), or the [Anaconda](https://www.anaconda.com/) prompt
+  - For OSX or Linux the regular terminal will be fine
+- git, either from the command line, using a git desktop app, or as an add on to PyCharm or VSCode.
+
+An account on [GitHub](https://github.com/) is required for some of the activities.
+
+
 - (linux) command line / bash [SWC Lesson](https://swcarpentry.github.io/shell-novice/), [ADACS Lesson](https://adacs.org.au/courses/introduction-to-bash/)
 - ssh login
 - command line text editor ([emacs](https://www.linuxfordevices.com/tutorials/linux/emacs-editor-tutorial)/[vim](https://www.tutorialspoint.com/vim/index.htm#)/[nano](https://www.linuxfordevices.com/tutorials/linux/nano-editor-in-linux))
