@@ -94,42 +94,14 @@ workshop is only open to people from a particular institution.
 
 {% comment %}
 LOCATION
-
-This block displays the address and links to maps showing directions
-if the latitude and longitude of the workshop have been set.  You
-can use https://www.latlong.net/ to find the lat/long of an
-address.
 {% endcomment %}
 {% assign begin_address = page.address | slice: 0, 4 | downcase  %}
-{% if page.address == "online" %}
-{% assign online = "true_private" %}
-{% elsif begin_address contains "http" %}
-{% assign online = "true_public" %}
-{% else %}
-{% assign online = "false" %}
-{% endif %}
-{% if page.latitude and page.longitude and online == "false" %}
+
 <p id="where">
   <strong>Where:</strong>
-  {{page.address}}.
-  Get directions with
-  <a href="//www.openstreetmap.org/?mlat={{page.latitude}}&mlon={{page.longitude}}&zoom=16">OpenStreetMap</a>
-  or
-  <a href="//maps.google.com/maps?q={{page.latitude}},{{page.longitude}}">Google Maps</a>.
+  <a href="//www.learningenvironments.unsw.edu.au/physical-spaces/quadrangle-building/k-e15-1043-quadrangle-1043">UNSW Quadrangle Building, rm 1043</a>
+  - <a href="https://www.google.com/maps/place/Quadrangle+Building+(E15)/@-33.9172473,151.2308746,21z/data=!3m1!5s0x6b12b18afc9706f3:0x3800b51ed65ace5!4m14!1m7!3m6!1s0x6b12b18b0302c1a7:0x1d017d69037a07a0!2sUNSW+Sydney!8m2!3d-33.917347!4d151.2312675!16zL20vMDEybHpy!3m5!1s0x6b12b1a4c06b379f:0x7dd2a25a3e6439ce!8m2!3d-33.9172802!4d151.2309543!16s%2Fg%2F11hfg3gy34">Google Maps</a>.
 </p>
-{% elsif online == "true_public" %}
-<p id="where">
-  <strong>Where:</strong>
-  online at <a href="{{page.address}}">{{page.address}}</a>.
-  If you need a password or other information to access the training,
-  the instructor will pass it on to you before the workshop.
-</p>
-{% elsif online == "true_private" %}
-<p id="where">
-  <strong>Where:</strong> This training will take place online.
-  The instructors will provide you with the information you will need to connect to this meeting.
-</p>
-{% endif %}
 
 {% comment %}
 DATE
@@ -285,8 +257,8 @@ We will use this <a href="{{ page.collaborative_notes }}">collaborative document
 <hr/>
 {% endif %}
 
-
-<p><a href="{{ site.pre_survey }}">Pre-workshop Survey</a></p>
+<h3> Workshop surveys </h3>
+<p><a href="{{ site.pre_survey }}">Pre-workshop Survey</a> (also for registration)</p>
 <p><a href="{{ site.post_survey }}">Post-workshop Survey</a></p>
 
 <hr/>
