@@ -130,7 +130,7 @@ A common way of licensing software is to provide a LICENSE (or LICENCE) file in 
 
 ### Choosing a software license for your project
 
-Your home institute may have opinions/guidelines for appropriate licencsng software.
+Your home institute may have opinions/guidelines for appropriate licensing software.
 Ask around and follow the advice of you local experts.
 
 If you don’t have any local constraints on licensing your software you can use one of the many license templates available on Github. 
@@ -147,11 +147,11 @@ Alternatively you can simply read the Github provided summary at the top of what
 Choose one that feels right to you and then press “Review and submit”.
 This will create a new license file.
 
-![Github choose a licence part 2]({{page.root}}{% link fig/GitHubCreateLicence2.png %})
+![Github choose a license part 2]({{page.root}}{% link fig/GitHubCreateLicence2.png %})
 
 Once you have a license file GitHub will add a badge to the “About” section of your project like this:
 
-![Github choose a licence part 2]({{page.root}}{% link fig/GitHubAboutWithLicence.png %})
+![Github choose a license part 2]({{page.root}}{% link fig/GitHubAboutWithLicence.png %})
 
 > ## License your work
 > Use the GitHub tools described above to apply a new license to your project.
