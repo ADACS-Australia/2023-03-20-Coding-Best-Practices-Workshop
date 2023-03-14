@@ -1,0 +1,6 @@
+numpy
+pdoc
+pylint
+pytest
+pytest-cov
+scalene
