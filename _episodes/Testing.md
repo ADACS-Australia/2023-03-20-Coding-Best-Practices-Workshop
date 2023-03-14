@@ -61,7 +61,7 @@ The functions themselves need to do one of two things:
 - raise an exception if the test failed
 
 Here is an example test.
-It would live in the file `test_module.py, and simply tries to import our code:
+It would live in the file `test_module.py`, and simply tries to import our code:
 ~~~
 def test_module_import():
     try:
@@ -107,66 +107,105 @@ This way you can keep the test code, but it just wont run.
 > with the above you can run all the tests within a file just by running that file.
 {: .callout}
 
-TODO - From here on
+### More detailed testing
+Let's now work with some more meaningful tests for the `sky_sim.py` that we have been working with.
+In particular let's test the `get_radec()` and `make_positions()` functions.
 
-> ## Challenge write a test
-> - Create a file `tests/test_default` and within it a function `test_hard_compute`.
-> - Use the desired behavior listed [above](#testing-code) as the three test cases
-> - `test_hard_compute` should return `None` if all cases passed
-> - `test_hard_compute` should raise an `AssertionError` with a sensible note if a test fails
+To do this we nee to know how to work with exceptions.
+In python we can use the keyword `raise` to send an exception up the call stack where it will eventually be caught in a `try/except` clause (or by the python interpreter itself).
+For our testing purposes we need to raise a particular type of exception called an `AssertionError`.
+The syntax is:
+
+~~~
+def test_that_a_thing_works():
+    # do things
+    if not thing_works:
+        raise AssertionError("Description of what failed")
+    return
+~~~
+{: .language-python}
+
+We can have multiple exit points in our function, corresponding to the various ways that a test might fail (each with a useful message).
+
+
+> ## get_radec() testing
+> Recall that the function should obey the following:
+> ~~~
+> get_radec() = (14.215420962967535, 41.26916666666667)
+> ~~~
+> {: .language-python}
+>
+> Create a test for the above function that will raise an exception when the returned ra/dec are not correct.
 > 
-> If you include the code from the bonus not [above](#bonus-note) you can quickly run just this test.
+> > ## initial function
+> > ```
+> > def get_radec():
+> >     """
+> >     Generate the ra/dec coordinates of Andromeda
+> >     in decimal degrees.
+> > 
+> >     Returns
+> >     -------
+> >     ra : float
+> >         The RA, in degrees, for Andromeda
+> >     dec : float
+> >         The DEC, in degrees for Andromeda
+> >     """
+> >     # from wikipedia
+> >     andromeda_ra = '00:42:44.3'
+> >     andromeda_dec = '41:16:09'
+> > 
+> >     d, m, s = andromeda_dec.split(':')
+> >     dec = int(d)+int(m)/60+float(s)/3600
+> > 
+> >     h, m, s = andromeda_ra.split(':')
+> >     ra = 15*(int(h)+int(m)/60+float(s)/3600)
+> >     ra = ra/math.cos(dec*math.pi/180)
+> >     return ra,dec
+> > ```
+> > {: .language-python}
+> {: .solution}
 > 
-> When you have a test that you are happy with run it using `pytest`
-> >## Solution
+{: .challenge}
+
+> ## testing make_positions()
+> Read the docstring for the make_positions function below and come up with at least 2 tests that you can run.
+> 
+> > ## initial function
 > > ~~~
-> > def test_hard_compute():
-> >     from mymodule.default import hard_compute
+> > def make_positions(ra,dec, nsrc=NSRC):
+> >     """
+> >     Generate NSRC stars within 1 degree of the given ra/dec
 > > 
-> >     answer = hard_compute(1, 'help')
-> >     expected = 1
-> >     if answer != expected:
-> >         raise AssertionError(f"hard_compute(1,'help') should return {expected} but 
-> >                                returned {answer}")
-> > 
-> >     answer = hard_compute(1, 'test', 7)
-> >     expected = "test.7"
-> >     if answer != expected:
-> >         raise AssertionError(f"hard_compute(1,'test', 7) should return {expected} but 
-> >                                returned {answer}")
-> > 
-> >     answer = hard_compute(None,'hello')
-> >     expected = -1
-> >     if answer != expected: # "is" instead of "==" since expected is None
-> >         raise AssertionError(f"hard_compute(None,'hello') should return {expected} 
-> >                                but returned {answer}")
-> > 
-> >     return
-> > 
-> > if __name__ == "__main__":
-> >     # introspect and run all the functions starting with 'test'
-> >     for f in dir():
-> >         if f.startswith('test'):
-> >             print(f)
-> >             globals()[f]()
+> >     Parameters
+> >     ----------
+> >     ra,dec : float
+> >         The ra and dec in degrees for the central location.
+> >     nsrc : int
+> >         The number of star locations to generate
+> >     
+> >     Returns
+> >     -------
+> >     ras, decs : list
+> >         A list of ra and dec coordinates.
+> >     """
+> >     ras = []
+> >     decs = []
+> >     for _ in range(nsrc):
+> >         ras.append(ra + random.uniform(-1,1))
+> >         decs.append(dec + random.uniform(-1,1))
+> >     return ras, decs
 > > ~~~
 > > {: .language-python}
 > {: .solution}
-> If your test code works as intended you should get the following output from `pytest`
-> ~~~
-> ============================================================= short test summary info > =============================================================
-> FAILED tests/test_default.py::test_hard_compute - AssertionError: hard_compute(None,> 'hello') should return -1 but returned None
-> =========================================================== 1 failed, 1 passed in 0.> 11s ===========================================================
-> ~~~
-> {: .output}
+> How do you deal with the fact that the positions that are generated are random and thus different each time you run them.?
+>
 {: .challenge}
 
-The fact that the failed tests are reported individually, and the assertion errors are reported for each failure, should be an encouragement to write useful things as your error messages.
-
-Note that in the above we ran all three tests in the same function.
-If the first test failed, then the second two are not run.
-If the subsequent tests are dependent on the success of the first then this is a good design technique.
-However, if the tests are independent then it might be a good idea to split the tests into individual functions.
+When you are writing tests, you can test multiple things in a single function (pytest will consider this just one test).
+The drawback is that if the first test fails, the function will exit and the other tests don't run.
+However, some tests will require that you do a fair bit of setup to create objects with a particular internal state, and that doing this multiple times can be time consuming.
+In this case you are probably better off doing the set up once and have multiple small tests bundled up into one function.
 
 ## Testing modes
 
@@ -248,50 +287,46 @@ A basic measure of this is called the *testing coverage*, which is the fraction 
 Code that isn't tested can't be validated, so the coverage metric helps you to find parts of your code that are not being run during the test.
 
 > ## Example coverage
-> Run `python -m pytest --cov=mymodule  --cov-report=term tests/test_module.py`
-> to see the coverage report for this test/module.
+> Run `pytest --cov=sky_sim --cov-report=term ./test_module.py` to see the coverage report for this test/module.
 > > ## result
 > > ~~~
-> > python -m pytest --cov=mymodule --cov-report=term tests/test_module.py 
-> > ================================================================ test session starts =================================================================
+> > pytest --cov=sky_sim --cov-report=term ./test_module.py 
+> > ================================================================ test session starts ================================================================
 > > platform linux -- Python 3.8.10, pytest-6.2.5, py-1.10.0, pluggy-1.0.0
-> > rootdir: /data/alpha/hancock/ADACS/MAP21A-JCarlin-ExampleCodes
+> > rootdir: /data/alpha/hancock/ADACS/2023-03-20-Coding-Best-Practices-Workshop/code/examples
 > > plugins: cov-2.12.1, anyio-3.3.0
-> > collected 1 item                                                                                                                                     
+> > collected 2 items                                                                                                                                   
 > > 
-> > tests/test_module.py .                                                                                                                         [100%]
+> > test_module.py ..                                                                                                                             [100%]
 > > 
 > > ---------- coverage: platform linux, python 3.8.10-final-0 -----------
-> > Name                   Stmts   Miss  Cover
-> > ------------------------------------------
-> > mymodule/__init__.py       6      2    67%
-> > mymodule/default.py       17     17     0%
-> > mymodule/other.py          0      0   100%
-> > ------------------------------------------
-> > TOTAL                     23     19    17%
+> > Name         Stmts   Miss  Cover
+> > --------------------------------
+> > sky_sim.py      37     21    43%
+> > --------------------------------
+> > TOTAL           37     21    43%
 > > 
 > > 
-> > ================================================================= 1 passed in 0.05s ==================================================================
+> > ================================================================= 2 passed in 0.04s =================================================================
 > > ~~~
 > > {: .output}
 > {: .solution}
 {: .challenge}
 
-Note that `default.py` has 0% coverage because we didn't use it in the `test_module.py` test. 
-We could have run the `test_default.py` test, but that would have failed and not generated a coverage report.
-Also note that `other.py` has 100% coverage because there are no lines of code to be tested.
-Finally, the `__init__.py` code has only 2/6 of the statements being executed.
+In the above example I have only 43% coverage, which means that only 43% of the lines in the `sky_sim.py` file were executed during my testing.
+Achieving 100% coverage is a fun goal, but usually only achievable for the simplest codes.
+Even with 100% code coverage, there is no guarantee that you have zero bugs in your code.
+
 We can have a better look at the coverage report by writing an html formatted report:
 ~~~
 python -m pytest --cov=mymodule --cov-report html:coverage tests/test_module.py
 ~~~
 {: .language-bash}
 This will give use a report for each file in the directory `coverage`.
-Let's open up the file `mymodule___init___py.html` (note the 3x underscores in the name), and see what statements were hit/missed during the testing.
+Let's open up the file `sky_sim_py.html`, and see what statements were hit/missed during the testing.
 
-> ## An exercise for the keen student
-> Adjust the code/testing for mymodule such that all the functions are tested, all the tests pass, and you achieve 100% coverage on the coverage report.
-{: .challenge}
+Note in particular that anything in the `if __name__ == "__main__"` clause will not be tested because it is only run when the file is called directly, not when it is imported as a module.
+How could we write tests that would test our CLI?
 
 ## Automated testing
 We have already learned about the `pytest` package that will run all our tests and summarize the results.
