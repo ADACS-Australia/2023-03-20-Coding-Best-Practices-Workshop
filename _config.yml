@@ -108,6 +108,7 @@ training_site: "https://carpentries.github.io/instructor-training"
 workshop_repo: "https://github.com/carpentries/workshop-template"
 workshop_site: "https://carpentries.github.io/workshop-template"
 cc_by_human: "https://creativecommons.org/licenses/by/4.0/"
+ether_pad: "https://pad.carpentries.org/2023-03-20CodingSydney"
 
 # Surveys.
 pre_survey: "https://forms.gle/BTTwH5zJCeyKxUdS9"
