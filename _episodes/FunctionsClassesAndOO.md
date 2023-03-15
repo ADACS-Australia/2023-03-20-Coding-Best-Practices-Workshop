@@ -10,6 +10,55 @@ keypoints:
 - "TODO"
 ---
 
-TODO - Python can allow for purely OO programs, or purely procedural/functional programs.
-There is no need to choose, you can use a hybrid.
-Write functions, but use objects? Yeah that's totally fine.
+## Object Oriented (OO) programming
+You may have heard that python is an object oriented programming language.
+In python, everything that you work with is an object, though it's not always obviously so.
+
+In programming languages, objects are a collection of data (attributes) with an associated set of functions (methods) that operate on these data.
+In effect, an object is something that can store some kind of internal state.
+
+When you work with python, any time you call function such as `message.upper()` you are calling the method `upper()` which is part of the `message` object.
+Different types of objects can have methods with the same name, and they can behave in the the same or different ways.
+
+If we want to create new object types then we create a `Class`, which is a description of how the object works, and then create new objects of this type using `variable = MyClass()`.
+We can have multiple instances of the same class, each of which are individual objects.
+
+## Functions in python
+Python also allows us to create and use functions that are not attached to objects.
+These would be functions like `int()` which would parse a string into an integer or `math.sqrt()` which would return the square root of a numeric value.
+
+We have already created some of our own functions earlier in this workshop.
+
+## Functional or OO programming?
+Python allows us to work in an OO paradigm, but also in a functional or programatic paradigm.
+(In fact we are able to use a hybrid as well).
+Note that PEP8 doesn't make any recommendation about which of these paradigms should be used!
+
+Some people may feel that they are not "real programmers" because they don't use objects.
+This is false for two reasons:
+1. Everything in python is an object, so you are already 'using' objects,
+2. Creating your own custom classes is not a requirement for writing good / effective code.
+
+At the end of the day, the first and most important metric for your code is that "it works".
+The way that you achieve this "work-y-ness" is up to you.
+
+![Worst Code]({{page.root}}{% link fig/WorstCode.png %})
+
+Ideally you will follow many of the best practices that we are covering in this workshop, but there will always be exceptions to the rule, reasons why you will deviate.
+The choice of programming paradigm, language, or operating system are all for you to choose.
+Some languages are more suited to particular tasks.
+Not choosing a language because you don't have experience with it is a valid reason!
+
+
+
+<!-- ## Data classes
+One of the features of (and common complaints about) python is that it is not a strongly typed language.
+This means that you are free to modify both the value and the type of a variable any time you like.
+Moreover, it means that the python interpreter doesn't check the types of variables that are being passed to functions (or returned from them).
+So in order for things to not fall apart we have to have some agreement between the code calling the function and the code within the function that is working with the passed parameters.
+This is managed in part by having doc strings so that developers can indicate the expected types and intent for each of the parameters that are being passed.
+You might think that there would be some internal checking of data types that come into a function before these data are being used, but this is uncommon, and against the ethos of python programming ([Duck Typing](https://en.wikipedia.org/wiki/Duck_typing) and [Leap before you look](https://realpython.com/python-lbyl-vs-eafp/)).
+
+One way to ensure that the data being passed to your function obeys some regular type/format constraints is to define a data class that has the required attributes and then use this type in your docstring.
+
+For example, we could have a function that  -->
