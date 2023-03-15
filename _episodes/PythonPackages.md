@@ -1,5 +1,5 @@
 ---
-title: "Packaging and publishing code"
+title: "Packaging code"
 teaching: 15
 exercises: 15
 questions:
@@ -10,6 +10,281 @@ keypoints:
 - "TODO"
 ---
 
+# Packaging code
+
+## What is a python module?
+A python module is a library of code that can be distributed and used by others.
+Common modules that you would have used before include `numpy`, `scipy`, and `astropy`.
+
+Modules primarily do one or both of the following:
+- to provide functionality to other software (a library)
+- to execute a task (a software package)
+
+Because of the above dual purpose people tend to use the words package and module interchangeably.
+
+> ## Common python modules
+> What other python modules/packages have you used?
+>
+> List your top 3-5 go-to python modules in the [etherpad]({{site.ether_pad}})
+> > ## Examples
+> > ~~~
+> > matplotlib
+> > sklearn
+> > pymc3
+> > ~~~
+> > {: .output}
+> {: .solution}
+> 
+{: .challenge}
+
+## Why make a module?
+A common mantra of software development is **don't repeat yourself** (or others).
+This effectively means that you should write code once, and then use it multiple times.
+At the most basic level, it means that code that is used many times should be put into a function, which is then called often.
+This means that you have only one place for the bug to occur/fix, aiding your debug/development cycle.
+
+If you find yourself copying functions between different code that you write, you should consider packaging those functions into a module and then just importing that module.
+
+## How are python modules structured?
+Python modules can contain a variety of elements including python code, C/Fortran or other language code, data, documentation, scripts, and many other things.
+The example that we will be dealing with today is the simplest example as it only contains python code.
+
+Python modules mirror the underlying directory/file structure.
+If you want to create a module called `mymodule` all you need to do is create a directory called `mymodule` and make sure that it has a special file in it called `__init__.py`.
+This file can be empty and you'll still have defined a module.
+Let's try that out now:
+
+> ## Challenge: make a module
+> In a [previous episode]({{page.root}}{% link _episodes/ProjectStructure.md %}) we created a directory called `mymodule`.
+> In that directory create an empty file in it called `__init__.py`.
+> Once this is done, open a python terminal and try to `import` your module.
+> > ## Example
+> > ~~~
+> > mkdir mymodule # if you didn't do this earlier
+> > touch mymodule/__init__.py # create the empty file
+> > python
+> > Python 3.8.10 (default, Jun  2 2021, 10:49:15) 
+> > [GCC 9.4.0] on linux
+> > Type "help", "copyright", "credits" or "license" for more information.
+> > >>> import mymodule
+> > >>> dir(mymodule)
+> > ['__builtins__', '__cached__', '__doc__', '__file__', '__loader__', '__name__', '__package__', '__path__', '__spec__']
+> > ~~~
+> > 
+> {: .solution}
+{: .challenge}
+
+Note that even with an empty file your module already has a bunch of attributes assigned to it.
+The `__path__` and `__file__` attributes will be the path to the module directory and filename of the `__init__.py` file that you created.
+Try the following to verify:
+~~~
+print(mymodule.__path__, mymodule.__file__)
+~~~
+{: .language-python}
+
+Congratulations, you have just created a python module.
+It doesn't do anything useful yet but we'll get to that later on.
+Firstly we should discuss the contents and structure of a typical python package.
+
+## Package contents and structure.
+
+For a python project, the recommended content/structure is:
+~~~
+/docs
+/mymodule
+/mymodule/data
+/scripts
+/tests
+LICENSE
+README.md
+requirements.txt
+setup.py
+~~~
+{: .output}
+
+Compare this to the more generic structure that we discussed in [this episode]({{page.root}}{% link _episodes/ProjectStructure.md %}).
+Many of the directories are the same, though instead of `src` we now have `mymodule` and `scripts` as separate directories.
+
+The files and directories are as follows:
+- `/docs` is where you should store the stand-alone documentation for your package.
+- `/mymodule` is both the name of your module, and the location that the module code should be kept
+- `/mymodule/data` is where you should store data that are required by your module. Not always needed. Maybe you have some constants or templates that you use to make your life easier. They should be stored here.
+- `/scripts` is where you put the scripts that a user will interact with from the command line. Typically without the `.py` extension.
+- `/tests` is where you put all the code and data that are required for testing your package
+- `LICENSE` is for licensing your code. Be as permissive as possible, check with your institute as to what they recommend you use. (They may not care). 
+- `README.md` is not documentation. This should contain a high level description of your package. It is what GitHub will display on the front page of your repository.
+- `requirements.txt` is where you list all of your code dependencies (like numpy etc). This makes it easier for people to install your package.
+- `setup.py` is a script that will allow package managers like `pip` to auto-magically install your package. It can also be run directly.
+
+We'll come back to each of these things later in this course but for now let's just focus on the `mymodule` and `scripts` directories.
+
+## Making a not-empty python package
+Now that we have our template python package we will add some super basic functionality to it.
+
+> ## Edit `__init__.py`
+> Edit `mymodule/__init__.py` so that it does two things:
+> - Prints "Hello from module \`mymodule\`" when it is run.
+> - Defines a function called `func` which prints "You just ran the function called \`func\` from module \`mymodule\`"
+>
+> > ## Expected behavior
+> > ~~~
+> > python mymodule/__init__py
+> > ~~~
+> > {: .language-bash}
+> > ~~~
+> > Hello from `mymodule`
+> > ~~~
+> > {: .output}
+> > ~~~
+> > Python 3.8.10 (default, Jun  2 2021, 10:49:15) 
+> > [GCC 9.4.0] on linux
+> > Type "help", "copyright", "credits" or "license" for more information.
+> > >>> import mymodule
+> > Hello from `mymodule`
+> > >>> dir(mymodule)
+> > ['__builtins__', '__cached__', '__doc__', '__file__', '__loader__', '__name__', '__package__', '__path__', '__spec__', 'func']
+> > >>> mymodule.func()
+> > You just ran the function called `func` from module `mymodule`
+> > ~~~
+> > {: .language-python}
+> {: .solution}
+{: .challenge}
+
+
+### Submodules
+
+Note that some packages like `scipy` like to use sub-modules to organize code based on functionality.
+Sub-modules can be easily created in one of two ways:
+- a file within the directory `mymodule` called `submod1.py`
+- a directory within `mymodule` called `submod2` with an `__init__.py` file within it.
+
+Either way the sub-module can be imported as:
+~~~
+from mymodule import submod1, submod2
+~~~
+{: .language-python}
+
+By default *all* of the sumbodules will be imported so you can also access functions within `submod1` like this:
+~~~
+import mymodule
+
+mymodule.submod1.func()
+~~~
+{: . language-python}
+
+To control which sub-modules are imported we can define a variable within the `__init__.py` file which is `__all__` and then define which sub-modules should automatically be imported.
+
+> ## Challenge: automatically import only some modules
+> - Create two sub-modules of `mymodule` called `default` and `other`.
+> - Edit the `__init__.py` file so that only `default` is imported when you import `mymodule`
+> - Confirm that `other` can still be explicitly imported
+>
+> > ## Solution
+> > ~~~
+> > touch mymodule/{default,other}.py
+> > echo "__all__ = ['default']" >> mymodule/__init__.py
+> > python -c "import mymodule; print(dir(mymodule))"
+> > Hello from `mymodule`
+> > ['__all__', '__builtins__', '__cached__', '__doc__', '__file__', '__loader__', '__name__', '__package__', '__path__', '__spec__', 'func']
+> > python -c "from mymodule import default, other; print(dir())"
+> >Hello from `mymodule`
+> > ['__annotations__', '__builtins__', '__doc__', '__loader__', '__name__', '__package__', '__spec__', 'default', 'other']
+> > ~~~
+> > {: .language-bash}
+> > 
+> {: .solution}
+{: .challenge}
+
+By importing only the modules that are going to be used, we can reduce the amount of time taken to load a module, as well as the total memory overhead of python.
+
+### What else is `__init__.py` good for?
+You should consider defining the following in your `__init__.py`:
+- A docstring appropriate for the module, see [later](#documentation)
+- "private" variables such as`__version__`, `__date__`, `__author__`, `__citation__`
+- "public" constants (IN_ALL_CAPS=True)
+
+## Package level scripts
+If your package is providing a piece of software that does a thing then you will typically want a command line entry point for users rather than having them write their own code.
+Essentially a script is just a command line interface for the code in your module.
+
+> ## Challenge write a script
+> In the `scripts` folder create a new file called `runme`.
+> The script should import `mymodule` and then run `func` and then exit.
+> Bonus: accept user input and echo it back to them.
+> > ## Solution
+> > ~~~
+> > touch scripts/runme
+> > chmod ugo+x scripts/runme
+> > ~~~
+> > {: .language-bash}
+> > In file `runme`
+> > ~~~
+> > #! /usr/bin/env python
+> > from mymodule import func
+> > import sys
+> > func()
+> > print(sys.argv)
+> > sys.exit()
+> > ~~~
+> > {: .language-python}
+> > Test by running `./scripts/runme`
+> >
+> > Note that you may need do the following to get the imports to work
+> > ~~~
+> > export PYTHONPATH=.:$PYTHONPATH
+> > ~~~
+> > {: .language-bash}
+> > this is because your package is not installed. See [here](#installing-a-package) for how to install packages.
+> >
+> {: .solution}
+{: .challenge}
+
+
+## Installing a package
+We can make our software package installable by adding some content to the `setup.py` file.
+Currently this file is empty so we shall fill it with some useful content.
+
+Update `setup.py` so that it contains the following information
+~~~
+#! /usr/bin/env python
+"""
+Set up for mymodule
+"""
+from setuptools import setup
+
+requirements = ['scipy>=1.0',
+                # others
+                ]
+
+setup(
+    name='mymodule',
+    version=0.1,
+    install_requires=requirements,
+    python_requires='>=3.6',
+    scripts=['scripts/runme']
+)
+~~~
+{: .language-python}
+
+You should now be able to install the package by running:
+~~~
+pip install -e .
+~~~
+{: .language-bash}
+
+Note the `-e` directive, which means that the module will be 'editable' after install.
+Normally the code/data/scripts are all copied to some central location when they are installed, however the `-e` directive will instead *link* the files to that location.
+This means that you don't have to install your module every time you make a small change.
+
+Now that the module has been installed you should be able to import this module from python regardless of which directory you are working in. 
+Similarly, because we provided `scripts=['scripts/runme']`, we should have access to this script from anywhere on our system.
+Try it out!
+
+> ## Publishing a package on pypi
+> Once your code can be installed locally via `pip install -e .` then you are well on your path to being able to publish your code on the [pypi.org](pypi.org) index.
+> For instructions on how to do this see the [instructions on python.org](https://packaging.python.org/tutorials/packaging-projects/).
+> 
+{: .callout}
 
 ## Include a README.md
 Upon downloading new software, the first point of call for many people is to look for some help on how to install and use the software.

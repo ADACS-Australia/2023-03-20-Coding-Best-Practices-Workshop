@@ -167,6 +167,7 @@ episode_order:
   - GitHub
   - Testing
   - DependencyManagement
+  - PublishingCode
   - PythonPackages
   - FunctionsClassesAndOO
   - Containers
