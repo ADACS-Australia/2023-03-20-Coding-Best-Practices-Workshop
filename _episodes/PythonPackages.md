@@ -9,9 +9,6 @@ objectives:
 keypoints:
 - "TODO"
 ---
-
-# Packaging code
-
 ## What is a python module?
 A python module is a library of code that can be distributed and used by others.
 Common modules that you would have used before include `numpy`, `scipy`, and `astropy`.
@@ -199,18 +196,19 @@ By importing only the modules that are going to be used, we can reduce the amoun
 
 ### What else is `__init__.py` good for?
 You should consider defining the following in your `__init__.py`:
-- A docstring appropriate for the module, see [later](#documentation)
+- A docstring appropriate for the module,
 - "private" variables such as`__version__`, `__date__`, `__author__`, `__citation__`
-- "public" constants (IN_ALL_CAPS=True)
+- "public" constants (`IN_ALL_CAPS=True`)
 
 ## Package level scripts
 If your package is providing a piece of software that does a thing then you will typically want a command line entry point for users rather than having them write their own code.
 Essentially a script is just a command line interface for the code in your module.
 
+
 > ## Challenge write a script
-> In the `scripts` folder create a new file called `runme`.
-> The script should import `mymodule` and then run `func` and then exit.
-> Bonus: accept user input and echo it back to them.
+> 1. In the `scripts` folder create a new file called `sky_sim`.
+> 2. Copy the `if __main__` clause from our `sky_sim.py` file and put it into `sky_sim`
+> 3. `sky_sim` should import functions from `mymodule.sky_sim` as needed
 > > ## Solution
 > > ~~~
 > > touch scripts/runme
