@@ -172,7 +172,8 @@ episode_order:
   - FunctionsClassesAndOO
   - Containers
   - IDEs
-  - HPC
+  - WhatIsHPC
+  - WorkingOnAnHPC
   - BenchmarkingAndProfiling
   - Optimization
   - ParallelComputing
