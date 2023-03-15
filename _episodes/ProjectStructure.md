@@ -38,7 +38,7 @@ Within you software project directory we recommend the following structure:
 │   ├── interim        <- Intermediate data that has been transformed.
 │   ├── processed      <- The final data sets for analysis.
 │   └── raw            <- The original, immutable data dump.
-├── docs               <- Documentation, e.g., doxygen or reference papers (not tracked by git)
+├── docs               <- Documentation, e.g., sphinx or reference papers (not tracked by git)
 ├── env                <- Python environment specific to this project
 ├── notebooks          <- Jupyter or R notebooks
 ├── reports            <- For a manuscript source, e.g., LaTeX, Markdown, etc., or any project reports
