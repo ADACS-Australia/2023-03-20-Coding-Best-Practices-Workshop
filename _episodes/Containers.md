@@ -302,7 +302,7 @@ Typically people use either a version number (eg, v1.0) or `latest` as the tag, 
 > > # download the file into /user/bin and change permissions
 > > RUN cd /tmp &&\
 > >     git clone https://github.com/PaulHancock/symmetrical-octo-parakeet.git &&\
-> >     cd symmetrical-octo-parakeet && pip install -e .
+> >     cd symmetrical-octo-parakeet && pip install .
 > >
 > > # set the default work directory
 > > WORKDIR /app
@@ -464,33 +464,24 @@ Singularity offers multiple ways to interact with a container:
 > > ## Example
 > > TODO: update for NCI
 > > ~~~
-> > scp test.sif garrawarla:/astro/mwasci/phancock/.
-> > ssh garrawarla
+> > scp test.sif nci:/scratch/vp91/pjh562/.
+> > ssh nci
 > > module load singularity
 > > singularity run test.sif
 > > ~~~
 > > {: .language-bash}
 > > ~~~
-> > usage: area_of_ngon.py [-h] [--out OUT] n
-> >
-> > positional arguments:
-> >   n           Number of angles in our n-gon
-> >
-> > optional arguments:
-> >   -h, --help  show this help message and exit
-> >   --out OUT   output file
-> >
+> > Hello from `mymodule`
+> > (14.215420962967535, 41.26916666666666)
+> > ['/usr/local/bin/runme']
 > > ~~~
 > > {: .output}
 > > ~~~
-> > singularity cmd -B $PWD:/app test.sif area_of_ngon.py 4
-> > more output.txt
+> > singularity cmd -B $PWD:/app test.sif sky_sim.py
+> > more catalog.csv
 > > ~~~
 > > {: .language-bash}
-> > ~~~
-> > A 4-gon inscribed within a unit circle has an area of 2.000 and a perimeter of 5.657
-> > ~~~
-> > {: .output}
+> > 
 > > ~~~
 > > singularity shell test.sif
 > > ~~~
