@@ -208,21 +208,25 @@ Essentially a script is just a command line interface for the code in your modul
 
 
 > ## Challenge write a script
-> 1. In the `scripts` folder create a new file called `sky_sim`.
-> 2. Copy the `if __main__` clause from our `sky_sim.py` file and put it into `sky_sim`
-> 3. `sky_sim` should import functions from `mymodule.sky_sim` as needed
+> - In the `scripts` folder create a new file called `sky_sim`.
+> - Copy the `if __main__` clause from our `sky_sim.py` file and put it into `sky_sim`
+> - `sky_sim` should import functions from `mymodule.sky_sim` as needed
+> 
+> >
 > > ## Solution
 > > ~~~
-> > touch scripts/runme
-> > chmod ugo+x scripts/runme
+> > touch scripts/runme # create empty file
+> > chmod ugo+x scripts/runme # set permissions to be executable
 > > ~~~
 > > {: .language-bash}
 > > In file `runme`
 > > ~~~
 > > #! /usr/bin/env python
-> > from mymodule import func
+> > 
+> > from mymodule import sky_sim
 > > import sys
-> > func()
+> > 
+> > print(sky_sim.get_radec())
 > > print(sys.argv)
 > > sys.exit()
 > > ~~~
@@ -234,7 +238,7 @@ Essentially a script is just a command line interface for the code in your modul
 > > export PYTHONPATH=.:$PYTHONPATH
 > > ~~~
 > > {: .language-bash}
-> > this is because your package is not installed. See [here](#installing-a-package) for how to install packages.
+> > this is because your package is not installed. We'll cover this next.
 > >
 > {: .solution}
 {: .challenge}
@@ -252,7 +256,7 @@ Set up for mymodule
 """
 from setuptools import setup
 
-requirements = ['scipy>=1.0',
+requirements = ['numpy>=1.0',
                 # others
                 ]
 
@@ -260,7 +264,7 @@ setup(
     name='mymodule',
     version=0.1,
     install_requires=requirements,
-    python_requires='>=3.6',
+    python_requires='>=3.8',
     scripts=['scripts/runme']
 )
 ~~~
@@ -276,6 +280,40 @@ Note the `-e` directive, which means that the module will be 'editable' after in
 Normally the code/data/scripts are all copied to some central location when they are installed, however the `-e` directive will instead *link* the files to that location.
 This means that you don't have to install your module every time you make a small change.
 
+Additionally, note that we have specified the requirements directly in the `setup.py` file instead of in a `requirements.txt` file.
+Since the formatting for the two are the same we could create a function `get_requirements()` that would read the requirements file and use that.
+
+~~~
+#! /usr/bin/env python
+"""
+Set up for mymodule
+"""
+from setuptools import setup
+import os
+
+def get_requirements():
+    """
+    Read the requirements from a file
+    """
+    requirements = []
+    if os.path.exists('requirements.txt'):
+        with open('requirements.txt') as req:
+            for line in req:
+                # skip commented lines
+                if not line.startswith('#'):
+                    requirements.append(line.strip())
+    return requirements
+
+setup(
+    name='mymodule',
+    version=0.1,
+    install_requires=get_requirements(),
+    python_requires='>=3.8',
+    scripts=['scripts/runme']
+)
+~~~
+{: .language-python}
+
 Now that the module has been installed you should be able to import this module from python regardless of which directory you are working in. 
 Similarly, because we provided `scripts=['scripts/runme']`, we should have access to this script from anywhere on our system.
 Try it out!
@@ -285,6 +323,7 @@ Try it out!
 > For instructions on how to do this see the [instructions on python.org](https://packaging.python.org/tutorials/packaging-projects/).
 > 
 {: .callout}
+
 
 ## Include a README.md
 Upon downloading new software, the first point of call for many people is to look for some help on how to install and use the software.
