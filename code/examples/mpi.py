@@ -54,7 +54,8 @@ if __name__ == "__main__":
     outfile = "catalog_mpi.csv"
     group_size = nsrc // size
     make_positions(ra, dec, group_size, outfile)
-    
+    # synchronize before moving on
+    comm.Barrier()
     # Select one process to collate all the files
     if rank == 0:
         files = sorted(glob.glob("{0}_part*".format(outfile)))
