@@ -161,7 +161,7 @@ from mymodule import submod1, submod2
 ~~~
 {: .language-python}
 
-By default *all* of the sumbodules will be imported so you can also access functions within `submod1` like this:
+By default *all* of the submodules will be imported so you can also access functions within `submod1` like this:
 ~~~
 import mymodule
 
@@ -172,27 +172,29 @@ mymodule.submod1.func()
 To control which sub-modules are imported we can define a variable within the `__init__.py` file which is `__all__` and then define which sub-modules should automatically be imported.
 
 > ## Challenge: automatically import only some modules
-> - Create two sub-modules of `mymodule` called `default` and `other`.
-> - Edit the `__init__.py` file so that only `default` is imported when you import `mymodule`
+> - Create two sub-modules of `mymodule` called `sky_sim` and `other`.
+> - Edit the `__init__.py` file so that only `sky_sim` is imported when you import `mymodule`
 > - Confirm that `other` can still be explicitly imported
 >
 > > ## Solution
 > > ~~~
-> > touch mymodule/{default,other}.py
-> > echo "__all__ = ['default']" >> mymodule/__init__.py
+> > touch mymodule/other.py
+> > echo "__all__ = ['sky_sim']" >> mymodule/__init__.py
+> > 
 > > python -c "import mymodule; print(dir(mymodule))"
 > > Hello from `mymodule`
-> > ['__all__', '__builtins__', '__cached__', '__doc__', '__file__', '__loader__', '__name__', '__package__', '__path__', '__spec__', 'func']
-> > python -c "from mymodule import default, other; print(dir())"
+> > ['__all__', '__builtins__', '__cached__', '__doc__', '__file__', '__loader__', '__name__', '__package__', '__path__', '__spec__', 'sky_sim']
+> > 
+> > python -c "from mymodule import sky_sim, other; print(dir())"
 > >Hello from `mymodule`
-> > ['__annotations__', '__builtins__', '__doc__', '__loader__', '__name__', '__package__', '__spec__', 'default', 'other']
+> > ['__annotations__', '__builtins__', '__doc__', '__loader__', '__name__', '__package__', '__spec__', 'other', 'sky_sim']
 > > ~~~
 > > {: .language-bash}
 > > 
 > {: .solution}
 {: .challenge}
 
-By importing only the modules that are going to be used, we can reduce the amount of time taken to load a module, as well as the total memory overhead of python.
+By importing only the modules that are going to be used, we can reduce the amount of time taken to load a module, and hide modules/functions that are not part of a public API.
 
 ### What else is `__init__.py` good for?
 You should consider defining the following in your `__init__.py`:
