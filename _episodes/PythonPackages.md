@@ -335,6 +335,7 @@ If you have navigated to a GitHub software repository, and seen the nice documen
 The markdown format ([guide here](https://www.markdownguide.org/)) is a simple to use, future proof, platform independent, document format that can be rendered into a range of other formats.
 As a bonus, the raw files are easily read and written by humans.
 
+
 ### Things to consider for your README.md file
 
 - The name of the project
@@ -347,6 +348,10 @@ As a bonus, the raw files are easily read and written by humans.
 - A link to documentation
 - Author information and contact details (email, or just a link to github issues)
 - A note on how people should credit this work
+
+For example our project readme might look like this:
+
+![Example readme]({{page.root}}{% link fig/README.png %})
 
 > ## Create a README.md for your project
 > Based on the above recommendations, write a short readme for this example project
