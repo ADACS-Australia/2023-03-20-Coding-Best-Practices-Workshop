@@ -11,10 +11,11 @@ keypoints:
 ---
 
 ## Best Practice - Coding Style
-```
-Programs must be written for people to read, and only incidentally for machines to execute.
-```
- ― Harold Abelson, Structure and Interpretation of Computer Program
+>
+> Programs must be written for people to read, and only incidentally for machines to execute.
+>
+> ― Harold Abelson, Structure and Interpretation of Computer Program
+{: .quote}
 
 A style guide is about consistency.
 - Consistency with [a] style guide is important.
@@ -23,14 +24,12 @@ A style guide is about consistency.
 
 [PEP8 style guide](https://peps.python.org/pep-0008/)
 
-Why care?
+Why care about style?
 - provides consistency
 - makes code easier to read
 - makes code easier to write
 - makes it easier to collaborate	
 
-
-TODO - linters
 
 `pylint` will give you a summary of where your code doesn't conform to the PEP8 standard.
 
@@ -125,8 +124,15 @@ for i in range(nsrc):
 
 Notice that `pylint` really doesn't like lines like `from math import *`.
 
+> ## "fixing" our code
+> TODO: chat about each problem, and how we can fix it
+> Also note that somethings are better off not fixed.
+{: .discussion}
 
-TODO - more explainers for each line, and then how to fix it.
+> ## auto-formatters
+> TODO: Most popular are `black` and `autopep`.
+> Forward link to IDE section, use plugins.
+{: .callout}
 
 ## DRY coding principle
 

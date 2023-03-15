@@ -173,7 +173,7 @@ We can have multiple exit points in our function, corresponding to the various w
 > 
 > > ## initial function
 > > ~~~
-> > def make_positions(ra,dec, nsrc=NSRC):
+> > def make_positions(ra, dec, nsrc=NSRC):
 > >     """
 > >     Generate NSRC stars within 1 degree of the given ra/dec
 > > 
@@ -198,7 +198,7 @@ We can have multiple exit points in our function, corresponding to the various w
 > > ~~~
 > > {: .language-python}
 > {: .solution}
-> How do you deal with the fact that the positions that are generated are random and thus different each time you run them.?
+> How do you deal with the fact that the positions that are generated are random and thus different each time you run them?
 >
 {: .challenge}
 

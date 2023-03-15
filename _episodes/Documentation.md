@@ -64,28 +64,29 @@ We can view the docstring by viewing the `__doc__` attribute of the function as 
 > print(open.__doc__)
 > ~~~
 > {: .language-python}
-> ## Output
-> ~~~
-Open file and return a stream.  Raise OSError upon failure.
-
-file is either a text or byte string giving the name (and the path
-if the file isn't in the current working directory) of the file to
-be opened or an integer file descriptor of the file to be
-wrapped. (If a file descriptor is given, it is closed when the
-returned I/O object is closed, unless closefd is set to False.)
-
-mode is an optional string that specifies the mode in which the file
-is opened. It defaults to 'r' which means open for reading in text
-mode.  Other common values are 'w' for writing (truncating the file if
-it already exists), 'x' for creating and writing to a new file, and
-'a' for appending (which on some Unix systems, means that all writes
-append to the end of the file regardless of the current seek position).
-In text mode, if encoding is not specified the encoding used is platform
-dependent: locale.getpreferredencoding(False) is called to get the
-current locale encoding. (For reading and writing raw bytes use binary
-mode and leave encoding unspecified.) The available modes are:
-> ~~~
-> {: .output}
+> > ## Output
+> > ~~~
+> > Open file and return a stream.  Raise OSError upon failure.
+> > 
+> > file is either a text or byte string giving the name (and the path
+> > if the file isn't in the current working directory) of the file to
+> > be opened or an integer file descriptor of the file to be
+> > wrapped. (If a file descriptor is given, it is closed when the
+> > returned I/O object is closed, unless closefd is set to False.)
+> > 
+> > mode is an optional string that specifies the mode in which the file
+> > is opened. It defaults to 'r' which means open for reading in text
+> > mode.  Other common values are 'w' for writing (truncating the file if
+> > it already exists), 'x' for creating and writing to a new file, and
+> > 'a' for appending (which on some Unix systems, means that all writes
+> > append to the end of the file regardless of the current seek position).
+> > In text mode, if encoding is not specified the encoding used is platform
+> > dependent: locale.getpreferredencoding(False) is called to get the
+> > current locale encoding. (For reading and writing raw bytes use binary
+> > mode and leave encoding unspecified.) The available modes are:
+> > ~~~
+> > {: .output}
+> {: .solution}
 {: .challenge}
 
 Compare the help shown above to the official python documentation [here](https://docs.python.org/3/library/functions.html#enumerate).
@@ -484,7 +485,15 @@ import argparse
 
 ...
 
-if __name__ == "__main__":
+def skysim_parser():
+    """
+    Configure the argparse for skysim
+
+    Returns
+    -------
+    parser : argparse.ArgumentParser
+        The parser for skysim.
+    """
     parser = argparse.ArgumentParser(prog='sky_sim', prefix_chars='-')
     parser.add_argument('--ra', dest = 'ra', type=float, default=None,
                         help="Central ra (degrees) for the simulation location")
@@ -492,6 +501,10 @@ if __name__ == "__main__":
                         help="Central dec (degrees) for the simulation location")
     parser.add_argument('--out', dest='out', type=str, default='catalog.csv',
                         help='destination for the output catalog')
+    return parser
+
+if __name__ == "__main__":
+    parser = skysim_parser()
     options = parser.parse_args()
     if None in [options.ra, options.dec]:
         ra, dec = get_radec()

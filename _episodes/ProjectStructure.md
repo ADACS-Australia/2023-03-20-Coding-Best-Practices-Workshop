@@ -12,7 +12,7 @@ keypoints:
 
 ## Beginning a new software project
 
-Before we do anything to our project we should talk about:
+Before we do anything to our project we should talk about organization.
 
 ### Organization
 Organization is key to a good project.

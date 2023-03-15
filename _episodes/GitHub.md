@@ -28,9 +28,12 @@ Please use your own name and email address.
 This user name and email will be associated with your subsequent Git activity, which means that any changes pushed to [GitHub](https://github.com/), [BitBucket](https://bitbucket.org/), [GitLab](https://gitlab.com/) or another Git host server after this lesson will include this information.
 
 For this lesson, we will be interacting with [GitHub](https://github.com/) and so the email address used should be the same as the one used when setting up your GitHub account.
-If you are concerned about privacy, please review [GitHub's instructions for keeping your email address private][git-privacy]. 
+If you are concerned about privacy, please review [GitHub's instructions for keeping your email address private](https://help.github.com/articles/keeping-your-email-address-private/). 
 
-
+> ## Why --global?
+> If you want to configure a different username/email for different git repos, then you can omit the `--global` flag and git will set these options only for the current repo.
+> 
+{: .callout}
 
 ## Creating a GitHub repo
 (See this [sw carpentries lesson](https://swcarpentry.github.io/git-novice/) for a more detailed guide, some of which is replicated below.)

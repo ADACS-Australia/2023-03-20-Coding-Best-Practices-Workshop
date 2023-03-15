@@ -58,7 +58,15 @@ def make_positions(ra,dec, nsrc=NSRC):
     return ras, decs
 
 
-if __name__ == "__main__":
+def skysim_parser():
+    """
+    Configure the argparse for skysim
+
+    Returns
+    -------
+    parser : argparse.ArgumentParser
+        The parser for skysim.
+    """
     parser = argparse.ArgumentParser(prog='sky_sim', prefix_chars='-')
     parser.add_argument('--ra', dest = 'ra', type=float, default=None,
                         help="Central ra (degrees) for the simulation location")
@@ -66,6 +74,10 @@ if __name__ == "__main__":
                         help="Central dec (degrees) for the simulation location")
     parser.add_argument('--out', dest='out', type=str, default='catalog.csv',
                         help='destination for the output catalog')
+    return parser
+
+if __name__ == "__main__":
+    parser = skysim_parser()
     options = parser.parse_args()
     if None in [options.ra, options.dec]:
         ra, dec = get_radec()

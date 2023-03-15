@@ -81,12 +81,12 @@ Whatever you choose, you can still link your github/ORCID later and use them to 
 
 Once signed in click on the upload button at the top of the page, and then on the next page click “New Upload”:
 
-![Zenodo Header]({{page.root}}{% link _fig/ZenodoHeader.png %})
+![Zenodo Header]({{page.root}}{% link fig/ZenodoHeader.png %})
 
 The following page will have a lot of details, some of which are mandatory, but most of which are either recommended or optional.
 Begin by downloading a .zip of your files from Github:
 
-![GitHub download a zip file]({{page.root}}{% link _fig/GitHubDownloadZip.png %})
+![GitHub download a zip file]({{page.root}}{% link fig/GitHubDownloadZip.png %})
 
 Once you have your zip file from GitHub, upload it to Zenodo, and then press the green “start upload” button and then start filling out the rest of the form.
 As the upload is progressing you can fill in the upload type (Software) and basic information.
@@ -98,7 +98,7 @@ When you are finally happy with all the details you can press ‘publish’.
 
 Once your upload has been published you should navigate to the published repository in your uploads list, and select it.
 
-![Zenodo about section]({{page.root}}{% link _fig/ZenodoAbout.png%})
+![Zenodo about section]({{page.root}}{% link fig/ZenodoAbout.png%})
 
 The above example is for the Aegean source finding software.
 You can see the DOI badge with the full DOI, a link to supplementary material, and the license.
@@ -106,7 +106,7 @@ If you click the DOI badge you’ll get a new pane that shows you how to embed t
 
 Below this panel you can also see a box that allows people to cite your code. There is even a box that allows people to get the citation in any format that they need it.
 
-![Zenodo cite as]({{page.root}}{% link _fig/ZenodoCite.png %})
+![Zenodo cite as]({{page.root}}{% link fig/ZenodoCite.png %})
 
 You now have a version of your code which is archived on Zenodo and will not change.
 If you want to update the archive with new versions of the code, Zenodo has the capacity to do this, and will mint a new doi for each version.
@@ -129,7 +129,7 @@ The site list should be a list of links to places where people can obtain the co
 I highly recommend that you put a link to both your Github and Zenodo repositories.
 If the code was described in a paper you can put that in the “Preferred Citation Method” section.
 
-![ASCL.net submit a code]({{page.root}}{% link _fig/ASCLSubmitCode.png %})
+![ASCL.net submit a code]({{page.root}}{% link fig/ASCLSubmitCode.png %})
 
 ASCL.net does not store your code.
 No one will vet the quality of your code.

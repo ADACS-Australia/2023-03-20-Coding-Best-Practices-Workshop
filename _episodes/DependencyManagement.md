@@ -136,8 +136,8 @@ Which is much easier to describe.
 
 Anaconda (and miniconda, and conda) offers an alternative package management system.
 Anaconda can also create different environments for you to work within, and these can be specified using a configuration file typically called `environment.yaml`.
-By default Anaconda will pull python modules from it's own package index, but it can be told to pull packages from pypi.org as well.
-Unlike `pip`, Anaconda can also manage environments that contain different python versions, different c/fortran compilers and a range of other software as well.
+By default Anaconda will pull python modules from it's own highly curated package index, but it can be told to pull packages from pypi.org, (or from [conda-forge](https://anaconda.org/conda-forge) which is more complete).
+Unlike `pip`, Anaconda can also manage environments that contain different python versions, different c/fortran compilers and a range of other software as well (including the [cuda toolkit](https://anaconda.org/nvidia/cuda) via conda-forge or the [nvidia channel](https://anaconda.org/nvidia/repo)).
 Anaconda has a graphic interface that most windows/mac users will be familiar with.
 See [here](https://docs.anaconda.com/navigator/tutorials/manage-packages/) for instructions on how to work with the GUI.
 From the command line you can work in a way that is similar to `pip`.
@@ -146,13 +146,18 @@ If you are using conda or Anaconda from the command line then the relevant instr
 - Create a new environment with `conda create --name myenv --prefix ./envs`.
   - In contrast to pip, the `--prefix` specifies the location that the files will be stored, and `--name` specifies the name of the environment which will be prepended to your command line when activated.
   - You can optionally also include `python=3.9` to specify the version of python that you want to use in this environement (something that pip/venv doesn't easily support).
-- Activating a conda environment is done via `conda activate ./env` where `./env` is the directory that stores your environment.
+- Activating a conda environment is done via `conda activate <name>` where `<name>` is the name the environment you want to activate.
+- Deactivate using `conda deactivate`.
 - Once activated you can install modules using `conda install <module name>`.
 - You can list the modules installed in the current environment using `conda env list`.
 - To build an `environment.yaml` file you can use `conda env export > environment.yaml`, which can then be loaded via `conda create -f environment.yaml`
 
+If you have a large dependency tree (which is very common in Python), then `conda` can take a long time to resolve conflicts ([dependency hell](https://en.wikipedia.org/wiki/Dependency_hell)).
+[Mamba](https://anaconda.org/conda-forge/mamba) is "a fast drop-in alternative to conda, using libsolv for dependency resolution".
+If you install Mamba in your `base` environment, then you can use it to manage all your environments.
+Wherever you would use `conda` you can replace it with `mamba` for a faster/better experience.
 
-## which to use?
+## Which to use?
 If you are publishing your code on pypi.org (see [PythonPackages]({{page.root}}{% link _episodes/PythonPackages.md %})), then it is best to use a `requirements.txt` file, however you can be agnostic and provide both files.
 To avoid duplication (recall DRY?) you can list all your python requirements in a requirements file, and then use the following `environment.yaml` file:
 ~~~

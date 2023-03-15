@@ -9,3 +9,10 @@ objectives:
 keypoints:
 - "TODO"
 ---
+
+- git integrations
+- python
+  - linting
+  - formatting
+  - inline help
+  - testing
