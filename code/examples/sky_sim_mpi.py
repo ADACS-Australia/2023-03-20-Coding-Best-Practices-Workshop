@@ -5,10 +5,9 @@
 import math
 import numpy as np
 from mpi4py import MPI
-import os
 import glob
 
-nsrc = 1_000_000
+NSRC = 1_000_000
 
 comm = MPI.COMM_WORLD
 # rank of current process
@@ -52,7 +51,7 @@ if __name__ == "__main__":
 
     ra,dec = get_radec()
     outfile = "catalog_mpi.csv"
-    group_size = nsrc // size
+    group_size = NSRC // size
     make_positions(ra, dec, group_size, outfile)
     # synchronize before moving on
     comm.Barrier()
