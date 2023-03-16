@@ -12,7 +12,7 @@ keypoints:
 - "Everyone is here to learn and that means making mistakes"
 ---
 ## Acknowledgement of country
-We wish to acknowledge the custodians of the land we reside on. For the developers of these lessons, these are the Wadjuk (Perth region) people of the Nyoongar nation. This workshop will be delivered on the lands of the Bedegal people.
+We wish to acknowledge the custodians of the land we reside on. These lessons were developed on the lands of the Wadjuk (Perth region) people of the Nyoongar nation. This workshop will be delivered on the lands of the Bedegal people (UNSW campus), and we will be using computing resources that are on the lands of the Ngunnawal and Ngambri people (Canberra region).
 We pay our respect to their Elders and acknowledge their continuing culture and the contribution they make to the life of our cities and regions. 
 
 
