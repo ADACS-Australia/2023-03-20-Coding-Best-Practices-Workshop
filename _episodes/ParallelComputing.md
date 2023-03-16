@@ -44,13 +44,13 @@ TODO OzStar -> NCI
 
 We can of course run hybrid models which combine the two above extremes.
 Suppose we have 1000 tasks that need to be done, and each task can be completed using a single CPU core in 6hours.
-Suppose we want to run this on [OzSTAR](https://supercomputing.swin.edu.au/ozstar/), such that we have 107 compute nodes, each with 36 CPU cores ([of which we can use 32](https://supercomputing.swin.edu.au/docs/2-ozstar/oz-slurm-create.html)).
-We could use (1) above, but it would required 1,000 nodes x 6 hours of resources (6,000 node hours), and only use 1/36th of the available cores available on each node.
+Suppose we want to run this on Gadi, such that we have 107 compute nodes, each with 48 CPU cores .
+We could use (1) above, but it would required 1,000 nodes x 6 hours of resources (6,000 node hours), and only use 1/48th of the available cores available on each node.
 This is not a good use of resources.
 We can't use (2) above because our nodes don't have 1000 cores in any single node.
-Instead we could divide our 1,000 tasks into `1000/32 = ~ 32` jobs, and then within each job run one task per CPU (assuming it will fit within the memory constraints of the node).
-This could be achieved by having a job array of 32 jobs, and each job would orchestrate the running of tasks numbered `(n-1)*32` to `(n-1)*32 + n`, and making sure that the last job in the array stops at the 1,000th task.
-This method will result in 32 nodes x 6 hours of resources, or ~32 better than the previous option.
+Instead we could divide our 1,000 tasks into `1000/48 = ~ 21` jobs, and then within each job run one task per CPU (assuming it will fit within the memory constraints of the node).
+This could be achieved by having a job array of 21 jobs, and each job would orchestrate the running of tasks numbered `(n-1)*21` to `(n-1)*21 + n`, and making sure that the last job in the array stops at the 1,000th task.
+This method will result in 21 nodes x 6 hours of resources, or ~48 better than the previous option.
 We refer to this type of organization as job packing.
 
 Here is a visualization of what we are doing:
@@ -65,12 +65,12 @@ If we can either limit or estimate the peak RAM usage of our tasks then we can a
 For example, we might have 192GB of RAM available per node, but have a task that uses up to 10GB of RAM, and so we'd only be able to pack 19 copies of this task onto each of our compute nodes.
 
 If we instead had 10,000,000 tasks that each took 20 second to run this would still have a total run time of approx 6,000 node hours, the same requirement as the previous example.
-However, SLURM takes some time to schedule a job, allocate resources, and then clean up when the job completes.
-This time is not that long (maybe 30 seconds), so if your job has a relatively short run time (few minutes) then this overhead becomes a significant overhead.
-In such cases we can pack our jobs such that we have 10,000 jobs running within a single job, but only 32 running at one time.
+However, PBSPro takes some time to schedule a job, allocate resources, and then clean up when the job completes.
+This time is not that long (maybe 30 seconds), but if your job has a relatively short run time (few minutes) then this overhead becomes a significant overhead.
+In such cases we can pack our jobs such that we have 10,000 jobs running within a single batch job, but only 32 running at one time.
 This is a second form of job packing.
 
-In each of the above implementations the parallelism is being handled by a combination of SLURM and our batch job scripts.
+In each of the above implementations the parallelism is being handled by a combination of PBSPro and our batch job scripts.
 We don't need to have any knowledge of (or access to) the source code of the program that is actually doing the compute.
 
 ### Job packing with `xargs`
@@ -80,7 +80,7 @@ At its most basic level, `xargs` will accept input from STDIN and convert this i
 `xargs` is able to manage the execution of these sub processes that it spawns and thus can be used to run multiple programs in parallel.
 
 We will again simulate a hard task by doing something simple and then sleeping.
-In this case we have a script called `greet.sh` which is as follows:
+In this case we have a script called `greet.sh` ([here](https://raw.githubusercontent.com/ADACS-Australia/2023-03-20-Coding-Best-Practices-Workshop/gh-pages/code/examples/greet.sh)) which is as follows:
 
 > ## `greet.sh`
 > ~~~
@@ -92,7 +92,7 @@ In this case we have a script called `greet.sh` which is as follows:
 > {: .language-bash}
 {: .callout}
 
-If we were to have a file which consisted of greetings (`greetings.txt`), one per line, we could use xargs to run our above script with the greeting as an argument:
+If we were to have a file which consisted of greetings (`greetings.txt`, [here](https://raw.githubusercontent.com/ADACS-Australia/2023-03-20-Coding-Best-Practices-Workshop/gh-pages/code/examples/greeting.txt)), one per line, we could use xargs to run our above script with the greeting as an argument:
 
 ~~~
 xargs -a greetings.txt -L 1 -exec ./greet.sh
@@ -243,7 +243,8 @@ Some potentially useful places to start are:
 -  [scikit-image](https://scikit-image.org/)
 
 > ## Share you favorite libraries
-> Share your favorite libraries with your group.
+> Share your favorite libraries with your group and in the [etherpad]({{site.ether_pad}}).
+> 
 > Don't restrict yourself to Python!
 {: .challenge}
 
@@ -270,7 +271,6 @@ Another form of parallelism occurs when we have the same input data, but we want
 We could simply write completely different programs to perform the different calculations, but typically there is some preprocessing or setup work that needs to be done which is common between all the tasks.
 Here the separate tasks are represented by the functions `f(x)`, `g(x)`, and `h(x)`, and can be run simultaneously.
 
-TODO relabel CPUs
 ![MISD]({{page.root}}{% link fig/MISD.png %})
 
 In order to be able to implement the parallelism discussed here we need to understand how to share information between different processes.
@@ -282,7 +282,7 @@ We are now going to look at some of the explicit ways in which we can make use o
 Any time we have a program that is working across multiple cores, we will in fact be working with a collection of processes (typically 1 per core), which are communicating with each other in order to complete the task at hand.
 Working with multiple cores or processes thus requires that we understand how to share information between processes, and thus we will discuss the two main paradigms - shared memory, and distributed memory.
 
-### Parallel processing with shared memory
+## Parallel processing with shared memory
 In this paradigm we create a parent program which spawns multiple child processes, each of which have access to some common shared memory.
 This shared memory can be used for both reading or writing.
 In the second figure of the previous section, we could have a parent process spawning three children for a total of three active processes, using the following plan:
@@ -316,83 +316,541 @@ The library which provides the shared memory will track of all the locks, and if
 To avoid creating/releasing locks thousands of times, it would instead be useful to have each of the processes create their own version of the output data to work on locally, and then do the update once per bin when they are finished.
 
 The [OpenMP](https://www.openmp.org/) library is the most widely used for providing shared memory access to C and Fortran programs.
-Other languages (such as python) which provide shared memory libraries are typically built on OpenMP and will therefore use similar terminology, and have similar limitations to OpenMP.
+Other languages (such as python) which provide shared memory libraries are either built on OpenMP or at least use the same programming paradigm and will therefore use similar terminology, and have similar limitations to OpenMP.
 
-Be aware that SLURM needs to know how many CPU cores to allocate to your job.
+
+<!-- Be aware that SLURM needs to know how many CPU cores to allocate to your job.
 If you ask for `--ntasks=1` then you'll typically get just a single core.
-Use `--ntasks=N` or `--cpu-per-task=N` to have access to more cores.
+Use `--ntasks=N` or `--cpu-per-task=N` to have access to more cores. -->
 
-An example inspired by the OzSTAR help and [Wikipedia](https://en.wikipedia.org/wiki/OpenMP#C):
+In Python there are two ways to achieve parallel computing: multiprocessing, and MPI4py.
 
-> ## `hello.c`
+Here is an implementation of our `sky_sim.py` code using multiprocessing.
+
+> ## `sky_sim_mp.py`
 > ~~~
-> #include <stdio.h>
-> #include <omp.h>
+> #! /usr/bin/env python
+> # Demonstrate that we can simulate a catalogue of stars on the sky
 > 
-> int main(void)
-> {
->     #pragma omp parallel
->     printf("Hello from process: %d\n", omp_get_thread_num());
->     return 0;
-> }
+> # Determine Andromeda location in ra/dec degrees
+> import math
+> import numpy as np
+> import multiprocessing
+> import sys
+> 
+> NSRC = 1_000_000
+> 
+> 
+> def get_radec():
+>     # from wikipedia
+>     ra = '00:42:44.3'
+>     dec = '41:16:09'
+> 
+>     d, m, s = dec.split(':')
+>     dec = int(d)+int(m)/60+float(s)/3600
+> 
+>     h, m, s = ra.split(':')
+>     ra = 15*(int(h)+int(m)/60+float(s)/3600)
+>     ra = ra/math.cos(dec*math.pi/180)
+>     return ra,dec
+> 
+> 
+> def make_positions(args):
+>     """
+>     """
+>     #unpack the arguments
+>     ra, dec, nsrc = args
+>     # create an empy array for our results
+>     radec = np.empty((2,nsrc))
+> 
+>     # make nsrc stars within 1 degree of ra/dec
+>     radec[0,:] = np.random.uniform(ra-1, ra+1, size=nsrc)
+>     radec[1,:] = np.random.uniform(dec-1, dec+1, size=nsrc)
+>     
+>     # return our results
+>     return radec
+> 
+> def make_positions_parallel(ra, dec, nsrc=NSRC, cores=None):
+>     
+>     # By default use all available cores
+>     if cores is None:
+>         cores = multiprocessing.cpu_count()
+>     
+> 
+>     # 20 jobs each doing 1/20th of the sources
+>     group_size = nsrc//20
+>     args = [(ra, dec, group_size) for _ in range(20)]
+> 
+> 
+>     # start a new process for each task, hopefully to reduce residual
+>     # memory use
+>     ctx = multiprocessing.get_context()
+>     pool = ctx.Pool(processes=cores, maxtasksperchild=1)
+> 
+>     try:
+>         # call make_posisions(a) for each a in args
+>         results = pool.map(make_positions, args, chunksize=1)
+>     except KeyboardInterrupt:
+>         # stop all the processes if the user calls the kbd interrupt
+>         print("Caught kbd interrupt")
+>         pool.close()
+>         sys.exit(1)
+>     else:
+>         # join the pool means wait until there are results
+>         pool.close()
+>         pool.join()
+> 
+>         # crete an empty array to hold our results
+>         radec = np.empty((2,nsrc),dtype=np.float64)
+> 
+>         # iterate over the results (a list of whatever was returned from make_positions)
+>         for i,r in enumerate(results):
+>             # store the returned results in the right place in our array
+>             start = i*group_size
+>             end = start + group_size
+>             radec[:,start:end] = r
+>             
+>     return radec
+> 
+> if __name__ == "__main__":
+>     ra,dec = get_radec()
+>     pos = make_positions_parallel(ra, dec, NSRC, 2)
+>     # now write these to a csv file for use by my other program
+>     with open('catalog.csv', 'w') as f:
+>         print("id,ra,dec", file=f)
+>         np.savetxt(f, np.column_stack((np.arange(NSRC), pos[0,:].T, pos[1,:].T)),fmt='%07d, %12f, > %12f')
+> 
 > ~~~
-> {: .language-c}
+> {: .language-python}
 {: .solution}
 
-We compile the above to produce our executable called `hello`:
-~~~
-gcc -fopenmp hello.c -o hello -ldl
-~~~
-{: .language-bash}
 
-We then run this with the following script:
+There are two main things that we need to do differently in this version of the code compared to our original implementation.
+Firstly note that the code is largely unchanged, except for the introduction of a new function called `make_positions_parallel`, and that we have changed the call signature of the original function to just accept `args` instead of `ra, dec, nsrc`.
+~~~
+def make_positions(args):
+    #unpack the arguments
+    ra, dec, nsrc = args
+# was
+def make_positions(ra, dec, nsrc=NSRC):
+~~~
+{: .language-python}
+We'll come back to why we changed this in a minute.
 
-> ## `openmp.sh`
+The new function (`make_positions_parallel`) that we create is what I call the driving or wrapper function, and it is the one that handles all the multiprocessing.
+The new function has the same call signature as the old function, but adds a new parameter called `cores` which has a default value.
+This means that the new function can act as a drop-in replacement for the old one.
+Within the new function we need to do the following:
+1. determine how many processes we are going to run
+  - ideally this is less than or equal to the number of physical CPU cores available
+2. figure out what work needs to be done
+3. divide the work into groups
+  - the number of groups is usually close to an integer multiple of the number of processes
+4. set up a pool of workers (child processes)
+5. send work teach of the workers
+6. wait for the work to complete
+7. collect the results from each worker
+8. return the results
+
+Lets now run through each part:
+
+### 1 determine the number of processes to use
+We let the user specify a number of cores using the `cores` argument.
+If they don't specify a number (eg it's value is `None`) then we ask the multiprocessing library to count the number of cores.
+NB: this will sometimes be 2x the number of physical cores due to [hyperthreadding](https://en.wikipedia.org/wiki/Hyper-threading), but we don't mind if that happens.
+~~~
+    # By default use all available cores
+    if cores is None:
+        cores = multiprocessing.cpu_count()
+~~~
+{: .language-python}
+
+### 2 figure out what work needs to be done
+For the `sky_sim` program we are simulating a large number of points around a single location.
+The central location is `ra,dec` and the number of points is `nsrc=NSRC` (supply by the user).
+
+
+### 3 divide the work into groups
+We can divide the task among `n` processes by having each of them compute `nsrc/n` points and then collecting all the generated points at the end.
+In our example we choose to divide the work into `20` batches, but we could also choose `n` or some integer multiple of `n`.
+For each batch of work we need to set up the argument list that we'll be sending to the `make_positions` function.
+~~~
+    # 20 jobs each doing 1/20th of the sources
+    group_size = nsrc//20
+    args = [(ra, dec, group_size) for _ in range(20)]
+~~~
+{: .language-python}
+Note that in our list of `args`, each element is a tuple.
+
+### 4 set up a pool of workers
+To manage all the processes that we are going to create and use, we need a context manager which we get from the multiprocessing module.
+From this manager we can then create a `Pool` of workers.
+We specify how many processes we wan to use and how many tasks each child process will execute.
+For our simple case we want only 1 task per child, this means that when a task is complete the python instance will shut down and new one will be started within that process.
+This helps to avoid any issues related to us not cleaning up after ourselves when we are done (memory leaks, residual state, etc).
+~~~
+    # start a new process for each task, hopefully to reduce residual
+    # memory use
+    ctx = multiprocessing.get_context()
+    pool = ctx.Pool(processes=cores, maxtasksperchild=1)
+~~~
+{: .language-python}
+
+We could also have asked for a `Queue` instead of a `Pool`, the difference being that in a Queue, work is returned in the order in which you put it into the queue, where as in a pool the work is returned in the order of completion.
+A pool will be more effective at keeping the child processes engaged, but a queue will let you have your results in the order you sent them to be processed.
+For our task we don't care about ordering so we use a pool.
+**Note** that we could still use a pool if we cared about the ordering, we'd just have to tell each worker what it's position was in the queue, and then have that position returned to us as part of the results.
+From here we could reconstruct the intended ordering of the results.
+
+### 5 send work teach of the workers
+We now have work to do and workers to complete it so we join them together.
+We could submit jobs to the pool one at a time using pool.
+We use the `map` method to apply the fucntion `make_positions` to each of the items in the iterable `args`.
+~~~
+results = pool.map(make_positions, args, chunksize=1)
+~~~
+{: .language-python}
+
+The reason that we had to rewrite the call sign for `make_positions` is because `pool.map` will only take one of the items from `args` at a time, so we bundled them into tuples.
+
+The child processes are now being created and will start working.
+
+### 6 wait for the work to complete
+Because the various processes are all doing their own thing, and this parent process will continue executing code in the mean time, we have to tell the parent process to wait until all the others are complete before we try to retrieve the results.
+We do this by calling `pool.join()`, but we must first call `pool.close()` to indicate that no more work is going to be submitted to the pool.
+~~~
+        # join the pool means wait until there are results
+        pool.close()
+        pool.join()
+~~~
+{: .language-python}
+
+### 7 collect the results from each worker
+Each of or workers have executed the `make_positions` function, which returns a tuple of `(ras,decs)` and we now want to collect them all together into a single larger array.
+
+We could create empty python lists using `ras=[]` and append our results to these lists.
+However, appending to a list in python gets slower as the list gets longer.
+If we already know how long the list will be in the first place we should just create a list with that length.
+
+Since the data coming back from the child processes are numpy arrays, we'll create a new numpy array with the right size and then squish all the data into that.
+We could use `np.zeros(shape, dtype)` to create an empty array, but since we are going to fill/assign every value in that array, we can get a very small performance boost by just asking for memory without setting it to zero.
+We do this with `np.empty(shape, dtype)`
+
+~~~
+        # crete an empty array to hold our results
+        radec = np.empty((2,nsrc),dtype=np.float64)
+~~~
+{: .language-python}
+
+And now we go about stuffing the results into the corresponding location in the new array.
+~~~
+        # iterate over the results (a list of whatever was returned from make_positions)
+        for i,r in enumerate(results):
+            # store the returned results in the right place in our array
+            start = i*group_size
+            end = start + group_size
+            radec[:,start:end] = r
+~~~
+{: .language-python}
+
+
+### 8 return the results
+This is easy :D
+~~~
+return radec
+~~~
+{: .language-python}
+
+> ## what about all the other code?
+> In our description of 1-8 we missed a bunch of code.
+>
+> What does it do?
+{: .callout}
+
+### Extra bits
+There are a few good practices that we should obey when doing our multiprocessing, and this is where the extra code comes in.
+
+Firstly, we should plan for when things go bad.
+If we were running our program, and the user presses <CTRL>+C, then we want the program to exit.
+However, by default only the current process (the parent) will exit, and the others will continue on their way.
+By wrapping our `pool.map` in a `try/except` clause we can catch the keyboard interrupt and then close the program in a nicer way.
+
+
+### How are the processes communicating with each other?
+In our example above, the different processes don't actually share any memory.
+They share information between each other, but keep their own separate memory spaces.
+The information is shared by inter process communication.
+In this simple example there are only two points at which the processes need to communicate:
+- when the child processes begin they need to be told which code to execute and on which data
+- when the child processes complete their work, they have to send the results back
+
+Python does this communication using serialization, which means that the data are converted from python objects into strings, the strings are communicated between processes, and then the strings are turned back into objects.
+Python uses `pickle` to do this serialization.
+The things that we need to know here is that:
+- serialization is slow (-er than just sending memory addresses)
+- a serialized object takes more memory than the underlying object
+- passing data via strings is inefficient
+
+In our example, the amount of time taken for the child processes to create the random data was much smaller than the time taken to pass the data back to the parent process.
+If we were to spread the work over many cores, it might actually take **more** time to complete the work thanks to this message passing overhead.
+In reality, however, we would have a more complicated simulation process so that the message passing time was a small fraction of the total compute time.
+
+There is an alternative way for us to manage the results that are being returned that will avoid almost all of the serialization work, and that is to use a properly shared memory model.
+Thankfully the `multiprocessing` module also provides us with some shared memory functions.
+
+### Shared memory in python
+The shared memory that is implemented by the `multiprocessing` library relies on an underlying C library to do all the work.
+The consequence of this is that we are limited in the types of memory that can be shared.
+We can use:
+- `multiprocessing.Value`
+- `multiprocessing.Array`
+- `multiprocessing.shared_memory.SharedMemory`
+
+For the `Value` and `Array` data types we have to use [CTypes](https://docs.python.org/3/library/ctypes.html#fundamental-data-types) data types which you refer to using special [type codes](https://docs.python.org/3/library/array.html#module-array).
+For the `SharedMemory` data type you are sharing a block of memory, and it's up to you to figure out how to deal with it.
+
+The advantage of these shared memory objects is that when you change their value in one process, all processes will see the updated value.
+(But beware of [race conditions](https://en.wikipedia.org/wiki/Race_condition)!).
+
+A very nice feature is that numpy arrays can be instructed to use a `SharedMemory` objects memory as the storage location for the data.
+This means that you can create a numpy array that is shared between multiple processes.
+Let's look at how we can do that in another example.
+
+### sky_sim with (proper) shared memory
+
+> ## `sky_sim_sharemem.py`
 > ~~~
-> #! /usr/bin/env bash
-> #
-> #SBATCH --job-name=helloMP
-> #SBATCH --output=/fred/oz983/%u/OpenMP_Hello_%A_out.txt
-> #SBATCH --error=/fred/oz983/%u/OpenMP_Hello_%A_err.txt
-> #
-> #SBATCH --ntasks=1
-> #SBATCH --cpus-per-task=8
-> #SBATCH --time=00:01:00
+> #! /usr/bin/env python
+> # Demonstrate that we can simulate a catalogue of stars on the sky
 > 
-> # move to the directory where the script/data are
-> cd /fred/oz983/${USER}
+> # Determine Andromeda location in ra/dec degrees
+> import math
+> import numpy as np
+> import multiprocessing
+> from multiprocessing.shared_memory import SharedMemory
+> import uuid
+> import sys
 > 
-> export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
-> /fred/oz983/KLuken_HPC_workshop/hello
+> NSRC = 1_000_000
+> mem_id = None
+> 
+> def get_radec():
+>     # from wikipedia
+>     ra = '00:42:44.3'
+>     dec = '41:16:09'
+> 
+>     d, m, s = dec.split(':')
+>     dec = int(d)+int(m)/60+float(s)/3600
+> 
+>     h, m, s = ra.split(':')
+>     ra = 15*(int(h)+int(m)/60+float(s)/3600)
+>     ra = ra/math.cos(dec*math.pi/180)
+>     return ra,dec
+> 
+> 
+> def make_positions(args):
+>     """
+>     """
+>     ra,dec,shape, nsrc, job_id = args    
+>     # Find the shared memory and create a numpy array interface
+>     shmem = SharedMemory(name=f'radec_{mem_id}', create=False)
+>     radec = np.ndarray(shape, buffer=shmem.buf, dtype=np.float64)
+> 
+>     # make nsrc stars within 1 degree of ra/dec
+>     ras = np.random.uniform(ra-1, ra+1, size=nsrc)
+>     decs = np.random.uniform(dec-1, dec+1, size=nsrc)
+> 
+>     start = job_id * nsrc
+>     end = start + nsrc
+>     radec[0, start:end] = ras
+>     radec[1, start:end] = decs
+>     return
+> 
+> def make_positions_parallel(ra,dec,nsrc=NSRC, cores=None):
+>     
+>     # By default use all available cores
+>     if cores is None:
+>         cores = multiprocessing.cpu_count()
+>     
+>     # 20 jobs each doing 1/20th of the sources
+>     args = [(ra, dec, (2,nsrc), nsrc//20, i) for i in range(20)]
+> 
+>     exit = False
+>     try:
+>         # set up the shared memory
+>         global mem_id
+>         mem_id = str(uuid.uuid4())
+> 
+>         nbytes = 2 * nsrc * np.float64(1).nbytes
+>         radec = SharedMemory(name=f'radec_{mem_id}', create=True, size=nbytes)
+> 
+>         # start a new process for each task, hopefully to reduce residual
+>         # memory use
+>         ctx = multiprocessing.get_context()
+>         pool = ctx.Pool(processes=cores, maxtasksperchild=1)
+>         try:
+>             pool.map_async(make_positions, args, chunksize=1).get(timeout=10_000_000)
+>         except KeyboardInterrupt:
+>             print("Caught kbd interrupt")
+>             pool.close()
+>             exit = True
+>         else:
+>             pool.close()
+>             pool.join()
+>             # make sure to .copy() or the data will dissappear when you unlink the shared memory
+>             local_radec = np.ndarray((2, nsrc), buffer=radec.buf,
+>                                      dtype=np.float64).copy()
+>     finally:
+>         radec.close()
+>         radec.unlink()
+>         if exit:
+>             sys.exit(1)
+>     return local_radec
+> 
+> 
+> 
+> if __name__ == "__main__":
+>     ra,dec = get_radec()
+>     pos = make_positions_parallel(ra,dec, NSRC, 2)
+>     # now write these to a csv file for use by my other program
+>     with open('catalog.csv', 'w') as f:
+>         print("id,ra,dec", file=f)
+>         np.savetxt(f, np.column_stack((np.arange(NSRC), pos[0,:].T, pos[1,:].T)),fmt='%07d, %12f, %12f')
 > ~~~
-> {: .language-bash}
+> {: .language-python}
 {: .solution}
 
-In the our code `hello.c` we do not specify how many processes there will be.
-Instead we do this in the job script `openmp.sh` by setting 1 task, and 8 `cpus-per-task`.
-This will cause SLURM to allocate 8 cores to our job.
-From here the `export` statement will then tell OpenMP that we want to run this many threads, and we'll end up with one thread (process) per core.
+A quick summary of what is different this time (compared to our serial version):
+- we define a global variable (`mem_id`) which will indicate the shared memory location
+- we have modified `make_positions` to have an altered call signature (as before)
+  - `make_positions` no longer returns any data, but instead writes it directly to shared memory
+- we have a wrapper function `make_positions_sharemem` that will handle the creation of shared memory, creating child process, and then dishing out work.
 
-> ## Run the openMP job
-> Run the job using `sbatch openmp.sh` and then when complete view the output file `OpenMP_Hello_?_out.txt`.
-> > ## Results
-> > ~~~
-> > Hello from process: 1
-> > Hello from process: 7
-> > Hello from process: 5
-> > Hello from process: 0
-> > Hello from process: 4
-> > Hello from process: 6
-> > Hello from process: 3
-> > Hello from process: 2
-> > ~~~
-> > {: .output}
-> > Notice how the output doesn't always occur in the order that we expect!
-> >
-> {: .solution}
-{: .challenge}
+The overview of what we are doing is slightly different from before.
+Below is the process with the main changes in **bold**:
+1. determine how many processes we are going to run
+  - ideally this is less than or equal to the number of physical CPU cores available
+2. figure out what work needs to be done
+3. divide the work into groups
+  - the number of groups is usually close to an integer multiple of the number of processes
+4. **create some shared memory**
+5. set up a pool of workers (child processes)
+6. send work teach of the workers
+7. wait for the work to complete
+8. **copy data from shared memory back to local memory and de-allocate the shared memory**
+9. return the results
 
-### Parallel processing with distributed memory
+Let's look at the steps that have changed.
+
+## 4 create some shared memory
+In the parent process we first create a random name for our memory obejct.
+For this I like to use the universally unique identifier `uuid` package.
+~~~
+        # set up the shared memory
+        global mem_id
+        mem_id = str(uuid.uuid4())
+~~~
+{: .language-python}
+
+Next we have to figure how how much memory we will need.
+If you have only worked in python, then this will be an unfamiliar concept, because python normally just expands memory to suit your needs.
+However, the `SharedMemory` is closely bound to the underlying C implementation and changing the size of the memory once created is not allowed.
+Since the size of memory is determined also by the data type we have to think a little more carefully about that also.
+In this case we are going to eventually want an `np.array` that has shape `(2,NSRC)` and has data type `np.float64`.
+~~~
+        nbytes = 2 * nsrc * np.float64(1).nbytes
+        radec = SharedMemory(name=f'radec_{mem_id}', create=True, size=nbytes)
+~~~
+{: .language-python}
+
+In the above we create the shared memory with the `create=True` option.
+
+Within the child nodes, which are going to run `make_positions` we'll have to do a similar call, but this time with `create=False`
+~~~
+    # Find the shared memory and create a numpy array interface
+    shmem = SharedMemory(name=f'radec_{mem_id}', create=False)
+~~~
+{: .language-python}
+
+Again in the `make_posistions` function, we want to treat the shared memory as if it were a numpy array so we do the following:
+~~~
+    radec = np.ndarray(shape, buffer=shmem.buf, dtype=np.float64)
+~~~
+{: .language-python}
+
+since we need to know the `shape` of the numpy array in the `make_positions` function, we have to pass that as one of the arguments to the function.
+
+One final modification we make to the `make_positions` function, is to save the results into this shared memory.
+In order to not step on the toes of any other process, we have to know where abouts this data should be written.
+In our example we use the `job_id` (process number) to figure out where abouts to write the data.
+~~~
+    start = job_id * nsrc
+    end = start + nsrc
+    radec[0, start:end] = ras
+    radec[1, start:end] = decs
+~~~
+{: .language-python}
+
+We could have done the above copy without using numpy arrays, but it involves a lot of python loops and there are many opportunities to get the addresses wrong.
+Being able to slice a numpy array makes this easier.
+
+
+### 8 copy data from shared memory back to local memory and de-allocate the shared memory
+Once all the child processes complete, we have all the information that we need in shared memory.
+To copyt this sharedmemory into a local numpy array we use a similar trick as before, but we then append `.copy()`.
+~~~
+            # make sure to .copy() or the data will dissappear when you unlink the shared memory
+            local_radec = np.ndarray((2, nsrc), buffer=radec.buf,
+                                     dtype=np.float64).copy()
+~~~
+{: .language-python}
+
+Once we have copied the data we de-allocate the shared memory:
+
+~~~
+        radec.close()
+        radec.unlink()
+~~~
+{: .language-python}
+
+If we don't do the above then the memory will not (neccessarily) be deallocated.
+Python usually complains that there was some still allocated shared memory around when your program exits, and will try to release it, but I don't 100% trust it.
+(And it's good practice to clear up after yourself!)
+
+> ## what about all the other code?
+> In our description of 1-8 we missed a bunch of code.
+>
+> What does it do?
+{: .callout}
+
+### more extra bits
+This time we have two `try` clauses.
+The first one is to make sure that the additional processes are cleaned up when we quit the program early.
+The second try clause is an interesting one that you might not have seen before:
+~~~
+    try:
+      ...
+    finally:
+        radec.close()
+        radec.unlink()
+        if exit:
+            sys.exit(1)
+~~~
+{: .language-pytyhon}
+
+The `finally` clause is executed after everything in the `try/except/else` has been sorted out, *even if there were exceptions being thrown*.
+This means that even if something blows up in the `try` clause, we will eventually come back to the `finally` clause and do all the cleanup.
+Here the cleanup is to close the shared memory object (stops further access), and then unlink it (de-allocates the memory).
+
+In order to ensure that this `finally` clause is hit, we move the `sys.exit(1)` from the inner `try/except` to here.
+
+> ## How are we going?
+> Did all that sink in?
+> ![Stop my brain is full](https://i.imgflip.com/2o4nvd.jpg)
+> 
+{: .solution}
+
+## Parallel processing with distributed memory
 In this paradigm we create a number of processes all at once and pass to them some meta-data such as the total number of processes, and their process number.
 Typically the process numbered zero will be considered the parent process and the others as children.
 In this paradigm each process has it's own memory and there is no shared memory space.

@@ -4,23 +4,13 @@
 # Determine Andromeda location in ra/dec degrees
 import math
 import numpy as np
-import random
 import multiprocessing
 from multiprocessing.shared_memory import SharedMemory
 import uuid
 import sys
 
-nsrc = 1_000_000
+NSRC = 1_000_000
 mem_id = None
-
-
-def init(mem):
-    """
-    Set the memory id
-    """
-    global mem_id
-    mem_id = mem
-
 
 def get_radec():
     # from wikipedia
@@ -54,7 +44,7 @@ def make_positions(args):
     radec[1, start:end] = decs
     return
 
-def make_positions_parallel(ra,dec,nsrc=nsrc, cores=None):
+def make_positions_sharemem(ra,dec,nsrc=NSRC, cores=None):
     
     # By default use all available cores
     if cores is None:
@@ -74,12 +64,8 @@ def make_positions_parallel(ra,dec,nsrc=nsrc, cores=None):
 
         # start a new process for each task, hopefully to reduce residual
         # memory use
-        method = 'spawn'
-        if sys.platform.startswith('linux'):
-            method = 'fork'
-        ctx = multiprocessing.get_context(method)
-        pool = ctx.Pool(processes=cores, maxtasksperchild=1,
-                        initializer=init, initargs=(mem_id,))
+        ctx = multiprocessing.get_context()
+        pool = ctx.Pool(processes=cores, maxtasksperchild=1)
         try:
             pool.map_async(make_positions, args, chunksize=1).get(timeout=10_000_000)
         except KeyboardInterrupt:
@@ -103,8 +89,8 @@ def make_positions_parallel(ra,dec,nsrc=nsrc, cores=None):
 
 if __name__ == "__main__":
     ra,dec = get_radec()
-    pos = make_positions_parallel(ra,dec, nsrc, 2)
+    pos = make_positions_sharemem(ra,dec, NSRC, 2)
     # now write these to a csv file for use by my other program
     with open('catalog.csv', 'w') as f:
         print("id,ra,dec", file=f)
-        np.savetxt(f, np.column_stack((np.arange(nsrc), pos[0,:].T, pos[1,:].T)),fmt='%07d, %12f, %12f')
+        np.savetxt(f, np.column_stack((np.arange(NSRC), pos[0,:].T, pos[1,:].T)),fmt='%07d, %12f, %12f')

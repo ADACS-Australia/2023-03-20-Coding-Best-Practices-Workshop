@@ -206,7 +206,7 @@ There are two types of jobs that can be run: either a batch job where PBSPro exe
 
 ### Interactive jobs
 We will start with a simple **interactive** job.
-Use `qsub -I -qnormal -lwalltime=00:05:00,storage=scratch/vp91` to start an interactive job.
+Use `qsub -I` to start an interactive job.
 You should see a sequence of output as follows:
 ~~~
 [pjh562@gadi-login-01 ~]$ qsub -I -qnormal -lwalltime=00:05:00,storage=scratch/vp91
@@ -229,7 +229,7 @@ gadi-pbs:
                                                                  Req'd  Req'd   Elap
 Job ID               Username Queue    Jobname    SessID NDS TSK Memory Time  S Time
 -------------------- -------- -------- ---------- ------ --- --- ------ ----- - -----
-76970825.gadi-pbs    pjh562   normal-* STDIN      20925*   1   1  500mb 00:05 R 00:02
+76970825.gadi-pbs    pjh562   normal-* STDIN      20925*   1   1  500mb 10:00 R 00:02
 [pjh562@gadi-cpu-clx-1891 ~]$ exit
 logout
 

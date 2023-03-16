@@ -50,20 +50,15 @@ def make_positions_parallel(ra, dec, nsrc=NSRC, cores=None):
     group_size = nsrc//20
     args = [(ra, dec, group_size) for _ in range(20)]
 
-    # crete an empty array to hold our results
-    radec = np.empty((2,nsrc),dtype=np.float64)
 
     # start a new process for each task, hopefully to reduce residual
     # memory use
-    method = 'spawn'
-    if sys.platform.startswith('linux'):
-        method = 'fork'
-    ctx = multiprocessing.get_context(method)
+    ctx = multiprocessing.get_context()
     pool = ctx.Pool(processes=cores, maxtasksperchild=1)
 
     try:
         # call make_posisions(a) for each a in args
-        results = pool.map_async(make_positions, args, chunksize=1).get(timeout=10_000_000)
+        results = pool.map(make_positions, args, chunksize=1)
     except KeyboardInterrupt:
         # stop all the processes if the user calls the kbd interrupt
         print("Caught kbd interrupt")
@@ -73,6 +68,10 @@ def make_positions_parallel(ra, dec, nsrc=NSRC, cores=None):
         # join the pool means wait until there are results
         pool.close()
         pool.join()
+
+        # crete an empty array to hold our results
+        radec = np.empty((2,nsrc),dtype=np.float64)
+
         # iterate over the results (a list of whatever was returned from make_positions)
         for i,r in enumerate(results):
             # store the returned results in the right place in our array
@@ -84,8 +83,8 @@ def make_positions_parallel(ra, dec, nsrc=NSRC, cores=None):
 
 if __name__ == "__main__":
     ra,dec = get_radec()
-    pos = make_positions_parallel(ra, dec, nsrc, 2)
+    pos = make_positions_parallel(ra, dec, NSRC, 2)
     # now write these to a csv file for use by my other program
     with open('catalog.csv', 'w') as f:
         print("id,ra,dec", file=f)
-        np.savetxt(f, np.column_stack((np.arange(nsrc), pos[0,:].T, pos[1,:].T)),fmt='%07d, %12f, %12f')
+        np.savetxt(f, np.column_stack((np.arange(NSRC), pos[0,:].T, pos[1,:].T)),fmt='%07d, %12f, %12f')
