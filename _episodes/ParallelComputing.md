@@ -874,53 +874,198 @@ A message passing interface ([MPI](https://en.wikipedia.org/wiki/Message_Passing
 As the name suggests the focus is not on sharing memory, but in passing information between processes.
 These processes can be on the same node or different nodes of an HPC.
 
-In order for SLURM to initiate an MPI job it is essential for the user to indicate how many nodes and how many cores of each node will be used for the program.
+<!-- In order for SLURM to initiate an MPI job it is essential for the user to indicate how many nodes and how many cores of each node will be used for the program.
 This is done via the `--nodes` and `--ntasks` options.
 Within a job script a user then starts the MPI part of their work using the `srun` command.
 
 ~~~
 srun my_prog <args for my_prog>
 ~~~
+{: .language-bash} -->
+
+The key to understanding how an MPI based code works is that all the processes are started simultaneously and then connect to a communication hub (usually called COMM_WORLD), they then execute the code.
+During code execution a processes can send/recieve messages from any/all of the other nodes.
+A special type of message that is often used is called a barrier, which causes each process to block (wait) until all process are at the same point in the code.
+This is often required because, despite starting at the same time, the different processes can quickly get out of sync, especially if they need to perform I/O, communicate over a network, or simply have different data that they are working on.
+
+Unlike with multiprocessing, the number of processes being used is determined outside of our code so we always have to ask questions like "how many processes are there total?" and "what is my process number?".
+The process number is refered to as it's `rank` and the only rank that is guaranteed to exist is 0, so this is often used as the special/parent rank.
+
+Continuing our `sky_sim` example we can use MPI to acheive our simulation task.
+
+> ## `sky_sim_mpi.py`
+> ~~~
+> #! /usr/bin/env python
+> # Demonstrate that we can simulate a catalogue of stars on the sky
+> 
+> # Determine Andromeda location in ra/dec degrees
+> import math
+> import numpy as np
+> from mpi4py import MPI
+> import glob
+> 
+> NSRC = 1_000_000
+> 
+> comm = MPI.COMM_WORLD
+> # rank of current process
+> rank = comm.Get_rank()
+> # total number of processes that are running
+> size = comm.Get_size()
+> 
+> 
+> 
+> def get_radec():
+>     # from wikipedia
+>     ra = '00:42:44.3'
+>     dec = '41:16:09'
+> 
+>     d, m, s = dec.split(':')
+>     dec = int(d)+int(m)/60+float(s)/3600
+> 
+>     h, m, s = ra.split(':')
+>     ra = 15*(int(h)+int(m)/60+float(s)/3600)
+>     ra = ra/math.cos(dec*math.pi/180)
+>     return ra,dec
+> 
+> 
+> def make_positions(ra, dec, nsrc, outfile):
+>     """
+>     """
+> 
+>     # make nsrc stars within 1 degree of ra/dec
+>     ras = np.random.uniform(ra-1, ra+1, size=nsrc)
+>     decs = np.random.uniform(dec-1, dec+1, size=nsrc)
+>     
+>     # return our results
+>     with open('{0}_part{1:03d}'.format(outfile, rank), 'w') as f:
+>         if rank == 0:
+>             print("id,ra,dec", file=f)
+>         np.savetxt(f, np.column_stack((np.arange(nsrc), ras, decs)),fmt='%07d, %12f, %12f')
+>     return
+> 
+> 
+> if __name__ == "__main__":
+> 
+>     ra,dec = get_radec()
+>     outfile = "catalog_mpi.csv"
+>     group_size = NSRC // size
+>     make_positions(ra, dec, group_size, outfile)
+>     # synchronize before moving on
+>     comm.Barrier()
+>     # Select one process to collate all the files
+>     if rank == 0:
+>         files = sorted(glob.glob("{0}_part*".format(outfile)))
+>         with open(outfile,'w') as wfile:
+>             for rfile in files:
+>                 for l in open(rfile).readlines():
+>                     print(l.strip(),file=wfile)
+>                 # os.remove(rfile)
+> 
+> 
+> ~~~
+> {: .language-python}
+{: .solution}
+
+To run the above code we use a syntx similar to xargs:
+~~~
+mpirun -n 4 python3 sky_sim_mpi.py
+~~~
 {: .language-bash}
 
-Another example inspired by the OzSTAR help and [Wikipedia](https://en.wikipedia.org/wiki/Message_Passing_Interface#Example_program).
-We compile the program into an executable called `hello_mpi` and then call it from the job script:
+Whilst we can use our COMM_WORLD to pass messages between processes, it's a very inefective way to pass large quantities of data (see previous chat about serialization).
+One way to get around this issue is to have each process dump their work products in a shared directory and then have another program join all the work together.
+Sometimes this "other" program is jus the rank 0 process.
+This is the approach that we'll be taking today.
 
-> ## `mpi.sh`
-> ~~~
-> #! /usr/bin/env bash
-> #
-> #SBATCH --job-name=helloMPI
-> #SBATCH --output=/fred/oz983/%u/MPI_Hello_%A_out.txt
-> #SBATCH --error=/fred/oz983/%u/MPI_Hello_%A_err.txt
-> #
-> #SBATCH --ntasks=8
-> #SBATCH --cpus-per-task=1
-> #SBATCH --time=00:01:00
+With MPI we will need to do the following in our script:
+1. figure out how many processes are running
+2. figure out what work needs to be done in the current process
+3. do the work
+4. write the output to a file
+5. communicate that the work is done
+6. ONE process (rank=0) needs to collect all the work into a single file
+
+### 1 figure out how many processes are running
+To do this we connect to the COMM_WORLD and ask for the rank of this process:
+~~~
+comm = MPI.COMM_WORLD
+# rank of current process
+rank = comm.Get_rank()
+# total number of processes that are running
+size = comm.Get_size()
+~~~
+{: .language-python}
+
+### 2 figure out what work needs to be done in the current process
+Again we are going to assume that each process does 1/n of the work.
+
+This time we don't need a complicated wrapper script, we just compute the amount of work done in our `if __name__` clause:
+~~~
+    group_size = NSRC // size
+~~~
+{: .language-python}
+
+### 3/4 do the work + write the output to a file
+Since each process will be writing it's own output file we pass a filename to our `make_positions` function along with the usual `ra, dec, nsrc`.
+Aditionally, we can't use the **same** file name for all processes so we have to modify the filename for each process:
+~~~
+def make_positions(ra, dec, nsrc, outfile):
+    ...
+    # return our results
+    with open('{0}_part{1:03d}'.format(outfile, rank), 'w') as f:
+        if rank == 0:
+            print("id,ra,dec", file=f)
+        np.savetxt(f, np.column_stack((np.arange(nsrc), ras, decs)),fmt='%07d, %12f, %12f')
+    return
+~~~
+{: .language-python}
+
+Note that we stuck the `.csv` header into the first file which is being written by the rank 0 process.
+
+### 5 communicate that the work is done
+In each process, when the work is done and we have returned from the `make_positions` function we call:
+~~~
+    make_positions(ra, dec, group_size, outfile)
+    # synchronize before moving on
+    comm.Barrier()
+~~~
+{: .language-python}
+
+This will cause all the processes to wait until they are all at the same line of code.
+
+### 6 collect all the work into a single file
+This only needs to be done by one process so we choose the rank 0 process.
+Within this process we read all the files that were written by the other processes, and then write them out in order.
+~~~
+    # Select one process to collate all the files
+    if rank == 0:
+        files = sorted(glob.glob("{0}_part*".format(outfile)))
+        with open(outfile,'w') as wfile:
+            for rfile in files:
+                for l in open(rfile).readlines():
+                    print(l.strip(),file=wfile)
+                # os.remove(rfile)
+~~~
+{: .language-python}
+
+We are also going to tidy up all the partial files here (last line).
+
+> ## What about the ... ?
+> There were no extra bits this time.
 > 
-> # move to the directory where the script/data are
-> cd /fred/oz983/${USER}
-> 
-> srun /fred/oz983/KLuken_HPC_workshop/hello_mpi
-> ~~~
-> {: .language-bash}
 {: .callout}
 
-Note here that we set `ntasks` to be 8, and use just one cpu per task.
-We no longer need to export anything, but we do need to use the `srun` command.
-The following output will be seen:
+### Notes
+There are two inefficiencies that we have in the above code:
+- the rank 0 process wrote it's data to a file and then read it in again
+- we had to wait for *all* processes to finish before we started writing the combined file
+  - If we did some point to point communication we could tell rank 0 to start reading the rank 1 file as soon as it was ready
 
-~~~
-We have 8 processes.
-Process 1 reporting for duty.
-Process 2 reporting for duty.
-Process 3 reporting for duty.
-Process 4 reporting for duty.
-Process 5 reporting for duty.
-Process 6 reporting for duty.
-Process 7 reporting for duty.
-~~~
-{: .output}
+MPI can sometimes be a much simpler approach than shared memory, even when you are working on multiple cores of the same node.
+Sometimes MPI is an abosulte brain destroyer when you are trying to debug it, because all your debug messages overlap or appear out of order.
+
+At the end of the day you should chose a solution that will work for your use case which includes one that you can implement in a reasonable amount of time.
+(Your time is more valuable than computer time!)
 
 ### Hybrid parallel processing
 It is possible to access the combined CPU and RAM of multiple nodes all at once by making use of a hybrid processing scheme.
@@ -933,48 +1078,3 @@ In such a scheme a program will use MPI to dispatch a bunch of primary processes
 There are many levels of parallelism that can be leveraged for faster throughput.
 The type of parallelism used will depend on the details of the job at hand or the amount of time that you are able and willing to invest.
 Starting with the easy parts first (eg job arrays and job packing with `xargs`) and then moving to shared memory or MPI jobs until you reach a desired level of performance is recommended.
-
-
-
-<!-- Work with a workflow mindset.
-Identify your **goals** first, then your **inputs**, then your **tools**.
-A workflow maps inputs to goals using tools.
-
-Optimize your total workflow:
-
-Amdahl's Law: 
-- System speed-up limited by the slowest component.
-
-Paul’s rule of thumb: 
-- You are the slowest component.
-
-Therefore: 
-1. Focus on reducing **your** active interaction time,
-2. *then* on your total wait time, 
-2. *then* on cpu time.
-
-Avoid premature optimisation:
-![ObligatoryXKCD](https://imgs.xkcd.com/comics/is_it_worth_the_time.png)
-
-Verify that you **have** a problem before you spend resources **fixing** a problem.
-
-> ## Donanld Knuth (in the context of software development)
-> 
-> Premature optimization is the root of all evil
-> 
-{: .testimonial}
-
-Good coding practices can lead to more performant code from the outset.
-This is **not** wasted time.
-
-You can't optimize to zero.
-Working fast is good, but avoiding work is better.
-Repeated computing is wasted computing.
-[Check-pointing](https://hpc-unibe-ch.github.io/slurm/checkpointing.html) and [memoization](https://en.wikipedia.org/wiki/Memoization) are good for this.
-
-Embrace sticky tape solutions:
-- Build on existing solutions
-- Use your code to move between solutions (eg BASH / Python)
-- Only write new code where none exists
-- Choose a language/framework that suits the problem
-- Optimize only when there is a problem -->

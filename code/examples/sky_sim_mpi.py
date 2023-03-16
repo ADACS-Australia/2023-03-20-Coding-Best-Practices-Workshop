@@ -6,6 +6,7 @@ import math
 import numpy as np
 from mpi4py import MPI
 import glob
+import os
 
 NSRC = 1_000_000
 
