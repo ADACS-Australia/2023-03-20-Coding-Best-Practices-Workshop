@@ -13,6 +13,9 @@ keypoints:
 - "Multiple users share the system and run jobs via a queue scheduler"
 ---
 
+![NCI]({{page.root}}{%link fig/NCILogo.png %}) HPC resources for this workshop are provided by The National Computational Infrastructure [NCI](https://nci.org.au/).
+
+
 ## What is High Performance Computing?
 High Performance Computing (HPC) integrates systems administration and parallel programming into a multidisciplinary field that combines digital electronics, computer architecture, system software, programming languages, algorithms and computational techniques ([wikipedia](https://en.wikipedia.org/wiki/High-performance_computing#cite_note-tstc2005-1)).
 
@@ -128,10 +131,9 @@ Some HPC facilities partition their hardware into clusters depending on the user
 These clusters are groups of computing nodes which have a high amount of connectivity within a cluster, but are not well connected with other clusters.
 They different clusters act as different HPC systems, except for the fact that they may be connected to the same storage systems.
 
-For example, [Pawsey](https://pawsey.org.au/) have a number of compute clusters which are physically separated but all living within the same building.
-In the picture below there are at least 4 separate clusters in the same room: [Garrawarla](https://pawsey.org.au/systems/garrawarla/), [Zeus](https://pawsey.org.au/systems/zeus/), [Topaz](https://pawsey.org.au/systems/topaz/), and [Galaxy](https://pawsey.org.au/systems/galaxy/).
+The cluster that we'll be using for this workshop is called Gadi ("gar-dee" meaning *to search for*`* in the language of the Ngunnawal people), and is physically located at the NCI on the ANU's Acton campus.
 
-![PawseyClusters]({{page.root}}{% link fig/PawseyClusters.png %})
+![Gadi cluster]({{page.root}}{% link fig/NCIGadi.png %})
 
 ## Software
 The most important piece of software for users to know about is the **work scheduler**.
