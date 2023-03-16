@@ -16,15 +16,17 @@ keypoints:
 - "Plan your work and map it onto a workflow for SLURM to execute"
 - "Find software with LMOD or Singularity / Docker hub"
 ---
-TODO - OzStar->NCI
+
+![NCI]({{page.root}}{%link fig/NCILogo.png %}) HPC resources for this workshop are provided by The National Computational Infrastructure [NCI](https://nci.org.au/).
+In this lesson we'll be taking an accelerated path through the [Gadi User Guide](https://opus.nci.org.au/display/Help/Gadi+User+Guide) which is very thorough and recommended when you use NCI for your own work.
 
 ## Logging in 
-We will be working with the Swinburne HPC cluster called OzSTAR, you should have an account, and be a member of the group `oz983`.
-See the [setup]({{page.root}}{% link _episodes/Setup.md %}) page if you need more information.
+We will be working with the NCI HPC cluster called Gadi, you should have an account, and be a member of the group `vp91`.
+See the [setup]({{page.root}}{% link _episodes/Setup.md %}#an-account-on-nci) page if you need more information.
 
 To connect to a login node you should use ssh:
 ~~~
-ssh <user>@ozstar.swin.edu.au
+ssh <user>@gadi.nci.org.au
 ~~~
 {: .language-bash}
 
@@ -34,59 +36,66 @@ If you would prefer to work with ssh keys for password-less login, [this tutoria
 Upon login you'll be greeted with a message of the day:
 
 ~~~
------------------------------------------------------------------------------
-Website: http://supercomputing.swin.edu.au
-------------------------------------------------------------------------------
-Please make sure you keep up-to-date with the usage policies outlined within
-the website, noting that with the exception of your home directory, NO data on
-any OzSTAR filesystems is backed up. Repeat: NOT backed up.
+###############################################################################
+#                  Welcome to the NCI National Facility!                      #
+#      This service is for authorised clients only. It is a criminal          #
+#      offence to:                                                            #
+#                - Obtain access to data without permission                   #
+#                - Damage, delete, alter or insert data without permission    #
+#      Use of this system requires acceptance of the Conditions of Use        #
+#      published at http://nci.org.au/users/nci-terms-and-conditions-access   #
+###############################################################################
+|         gadi.nci.org.au - 185,032 processor InfiniBand x86_64 cluster       | 
+===============================================================================
 
-Home directories have a strict 10GB quota. All large data files, such as job
-output, should be written to the dagg filesystem at /fred/<project>.
+Jul 5 2022 /scratch File Expiry
+   The file expiry system is now active on /scratch: files that have not been
+   accessed in more than 100 days will be automatically quarantined for 14 days
+   and then permanently deleted. For more details, please see
+   https://opus.nci.org.au/x/BABTCQ.
 
-You can use the 'quota' command to check usage on both filesystems.
-------------------------------------------------------------------------------
-The OzStar cluster login nodes farnarkle1 and 2 are available to use as
-interactive nodes for debugging and running small jobs. Login sessions
-are limited to 4 cores per user. Login nodes may be rebooted at any
-time without notice for updates or for security reasons.
-To use the other >4000 cores in OzSTAR you need to go via the batch system.
-------------------------------------------------------------------------------
+Oct 4 2022 Account Status Information on Login
+   Whenever logging in from outside of Gadi, all users will now be presented
+   with a brief summary about file expiry and projects near compute and/or
+   storage quotas. This can be configured using the "login-info-conf" utility.
+   For more information, please see https://opus.nci.org.au/x/HoABCw.
+
+===============================================================================
 ~~~
 {: output}
 
-and you'll either be working on the `farnarkle1` or `farnarkle2` log-in node.
+and you'll either be working on the `gadi-login-01` or `gadi-login-02` log-in node.
 It doesn't matter which node you join.
 
 You can check the groups that you are a member of using the `groups` command:
 ~~~
-[phancock@farnarkle2 ~]$ groups
-curtin ozstar_users oz983
+[pjh562@gadi-login-01 ~]$ groups
+vp91 S.U
 ~~~
 {: .language-bash}
 
-You probably wont be part of the `curtin` group, but you should be a member of the `oz983` group, as that is the one that we'll be using for this course.
+You ou should be a member of the `vp91` group, as that is the one that we'll be using for this course.
 
-You have access to two file systems: **home** and **fred**.
+You have access to two file systems: **home** and **scratch**.
 The **home** file system holds your home or `~/` directory and files, and is limited to 10GB.
 It is backed up but should not be used for frequent file access (don't do work here).
-The **fred** file system is a large scratch storage for general use.
-It is *not* backed up, but doesn't have a purge policy, so you can store files here long term.
-
-See [these docs](https://supercomputing.swin.edu.au/docs/1-getting_started/Filesystems.html) for more information on the file system.
+The **scratch** file system is a large scratch storage for general use.
+It is *not* backed up, files older than 10days are marked for deletion.
 
 > ## Create a personal work folder
-> Navigate to `/fred/oz983`.
-> Create a directory in here with your username
+> Navigate to `/scratch/vp91`.
+> Create a directory in here with your username (if it doesn't already exist)
 > 
 > > ## Solution
 > > ~~~
-> > cd /fred/oz983
+> > cd /scratch/vp91
 > > mkdir ${USER}
 > > ~~~
 > > {: .language-bash}
 > {: .solution}
 {: .challenge}
+
+Please use your username and not some other personal nickname.
 
 ## How do I run tasks on an HPC
 Currently you will have only a very minimal set of software loaded.
@@ -97,12 +106,8 @@ module list
 {: .language-bash}
 
 ~~~
-Currently Loaded Modules:
-  1) nvidia/.latest (H,S)   2) slurm/.latest (H,S)
-
-  Where:
-   S:  Module is Sticky, requires --force to unload or purge
-   H:             Hidden Module
+Currently Loaded Modulefiles:
+ 1) pbs  
 ~~~
 {: .output}
 
@@ -114,128 +119,122 @@ Remember from last lesson, we need to use a scheduler in order for our jobs to b
 
 ### Querying the queue system
 Before we run any jobs we need to see what resources are available.
-One way to do this is using the `sinfo` command which will report information similar to:
+One way to do this is using the `qstat -Q` command which will report information similar to:
 
 ~~~
-[phancock@farnarkle2 oz983]$ sinfo
-PARTITION   AVAIL  TIMELIMIT  NODES  STATE NODELIST
-skylake*       up 7-00:00:00      2   resv john[1-2]
-skylake*       up 7-00:00:00    114    mix bryan[1-8],john[3-7,9-21,23-110]
-skylake*       up 7-00:00:00      2  alloc john[8,22]
-skylake-gpu    up 7-00:00:00      2   resv john[1-2]
-skylake-gpu    up 7-00:00:00    114    mix bryan[1-8],john[3-7,9-21,23-110]
-skylake-gpu    up 7-00:00:00      2  alloc john[8,22]
-knl            up 7-00:00:00      4   unk* gina[1-4]
-sstar          up 7-00:00:00     10 drain* sstar[107-109,122,130,140,146-147,155,164]
-sstar          up 7-00:00:00      1   unk* sstar154
-sstar          up 7-00:00:00      2   resv sstar[024,151]
-sstar          up 7-00:00:00     45  alloc sstar[011-023,025-032,110-121,123-129,152,165-167,301]
-sstar          up 7-00:00:00     31   idle sstar[101-106,131-139,141-145,148-149,153,156-163]
-gstar          up 7-00:00:00      2 drain* gstar[101,204]
-gstar          up 7-00:00:00     49   unk* gstar[011-059]
-gstar          up 7-00:00:00      3   idle gstar[201-203]
-datamover      up 1-00:00:00      4   idle data-mover[01-04]
-osg            up 7-00:00:00     10   idle clarke[1-10]
-~~~
-{: .output}
-
-The columns are as follows:
-1. The **PARTITION** information.
-A partition is a logical group of nodes that have been collected together for some common purpose.
-You can think of a partition as a "queue" on a cluster.
-Different partitions will have different intended uses.
-See the [documentation](https://supercomputing.swin.edu.au/docs/2-ozstar/oz-partition.html#available-partitions) for a description of the different partitions.
-
-2. The **AVAIL**ability of the given partition. Up = useable, down/drain/inact = not usable.
-
-3. The maximum **TIMELIMIT**  that jobs can have in this queue.
-Each job can request up to this amount of time.
-This is not cpu time but regular time measured by a clock on the wall (a.k.a wall time).
-
-4. The number of **NODES** in this current configuration.
-
-6. The **STATE** of each node. 
-   1. Reserved - not in use, but reserved for future use
-   2. Allocated - in use will return to idle when complete
-   3. Mix - Nodes which are partially allocated and partially idle
-   4. Idle - not in use
-   5. Unknown - ?
-   6. Draining - in use but will not be idle when complete (eg going into maintenance or shutdown)
-
-7. **NODELIST** A list of node names (shortened). Check out [this FAQ](https://supercomputing.swin.edu.au/docs/1-getting_started/FAQ.html#what-s-with-the-weird-machine-names) for what the node names mean.
-
-
-The table has been grouped so that nodes in the same partition and same state will appear on a single line.
-In the example above, you can see that the partition called `datamover` has 4 nodes available, and all of them are currently idle.
-The `skylake` partition has a total of 118 nodes.
-Note that the nodes called `bryan[1-8]` appear in both the `skylake` and `skylake-gpu` partition, while the `gina[1-4]` nodes are only available in the `knl` partition. 
-
-The `sinfo` command tells us about the state of the different partitions.
-If we want to learn about the jobs that have been submitted then we can use `squeue`.
-This will show us what jobs are currently in the queue system.
-
-~~~
-> squeue
-             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
-          29254695 datamover dd_oss.b  rhumble PD       0:00      1 (Dependency)
-          29173490 datamover dd_oss.b  rhumble PD       0:00      1 (Dependency)
-          29054140 datamover dd_oss.b  rhumble PD       0:00      1 (Dependency)
-        29242343_0   skylake n_polych bgonchar PD       0:00      4 (Resources)
-          29279155   skylake full.195     qliu PD       0:00      5 (Priority)
-          29054138 skylake-g dd.batch  rhumble PD       0:00      1 (Dependency)
-          29290681 skylake-g  KGAT_11      bli  R    1:36:57      1 john96
-          29291743 skylake-g      zsh  tdavies  R    1:02:26      1 john8
-          29291493 skylake-g Train_NF cchatter  R    1:08:59      1 bryan1
-          29054139     sstar dd_oss.b  rhumble PD       0:00      1 (Dependency)
-          29292308     sstar SanH2-rD mmanatun  R       8:02     31 sstar[101-106,131-139,141-145,148-149,153,156-163]
-          29286615     sstar   0_full avajpeyi  R    2:54:14      1 sstar301
+[pjh562@gadi-login-01 ~]$ qstat -Q
+Queue              Max   Tot Ena Str   Que   Run   Hld   Wat   Trn   Ext Type
+---------------- ----- ----- --- --- ----- ----- ----- ----- ----- ----- ----
+normal               0   812 yes yes   779     0    20    13     0     0 Rou*
+normal-exec          0  4265 yes yes  2322  1593   339     0     0    11 Exe*
+express              0     0 yes yes     0     0     0     0     0     0 Rou*
+express-exec         0   138 yes yes    28    92    18     0     0     0 Exe*
+copyq                0    20 yes yes     0     0     0    20     0     0 Rou*
+copyq-exec           0    61 yes yes     3    52     6     0     0     0 Exe*
+gpuvolta             0     0 yes yes     0     0     0     0     0     0 Rou*
+gpuvolta-exec        0   480 yes yes   152   258    63     0     0     0 Exe*
+hugemem-exec         0    79 yes yes     7    66     6     0     0     0 Exe*
+hugemem              0     0 yes yes     0     0     0     0     0     0 Rou*
+biodev               0     0 yes yes     0     0     0     0     0     0 Rou*
+biodev-exec          0    21 yes yes     0    21     0     0     0     0 Exe*
+megamembw-exec       0     6 yes yes     4     2     0     0     0     0 Exe*
+megamembw            0     0 yes yes     0     0     0     0     0     0 Rou*
+normalbw-exec        0  2301 yes yes   301  1902    95     0     0     3 Exe*
+normalbw             0     1 yes yes     0     0     0     1     0     0 Rou*
+expressbw-exec       0     7 yes yes     0     7     0     0     0     0 Exe*
+expressbw            0     0 yes yes     0     0     0     0     0     0 Rou*
+normalsl-exec        0    10 yes yes     0    10     0     0     0     0 Exe*
+normalsl             0     0 yes yes     0     0     0     0     0     0 Rou*
+hugemembw-exec       0    12 yes yes     0     9     3     0     0     0 Exe*
+hugemembw            0     0 yes yes     0     0     0     0     0     0 Rou*
+megamem              0     0 yes yes     0     0     0     0     0     0 Rou*
+megamem-exec         0     1 yes yes     0     1     0     0     0     0 Exe*
+gpursaa              0     0 yes yes     0     0     0     0     0     0 Rou*
+gpursaa-exec         0     1 yes yes     0     1     0     0     0     0 Exe*
+analysis             0     0 yes yes     0     0     0     0     0     0 Rou*
+analysis-exec        0     2 yes yes     0     2     0     0     0     0 Exe*
+dgxa100              0     0 yes yes     0     0     0     0     0     0 Rou*
+dgxa100-exec         0    75 yes yes    68     6     1     0     0     0 Exe*
+normalsr             0     0 yes yes     0     0     0     0     0     0 Rou*
+normalsr-exec        0     0 yes yes     0     0     0     0     0     0 Exe*
+expresssr            0     0 yes yes     0     0     0     0     0     0 Rou*
+expresssr-exec       0     0 yes yes     0     0     0     0     0     0 Exe*
 ~~~
 {: .output}
 
-The list above shows us the jobs that are running.
-Each job has a unique **JOBID**.
-Jobs that are waiting to start will have a **TIME** of 0:00, and then a reason in the final column.
-Jobs that are currently running will have a TIME that shows the *remaining* time for the job, and a **NODELIST** of which nodes the jobs are running on.
+A description of the columns is:
+~~~
+       Description of columns:
 
-Running `squeue` will often give you a *very long list* of jobs, far too many to be useful.
-Using `squeue -u ${USER}` will limit the list to only *your* jobs.
+       Queue          Queue name
+
+       Max            Maximum number of jobs allowed to run concurrently in this queue
+
+       Tot            Total number of jobs in the queue
+
+       Ena            Whether the queue is enabled or disabled
+
+       Str            Whether the queue is started or stopped
+
+       Que            Number of queued jobs
+
+       Run            Number of running jobs
+
+       Hld            Number of held jobs
+
+       Wat            Number of waiting jobs
+
+       Trn            Number of jobs being moved (transiting)
+
+       Ext            Number of exiting jobs
+
+       Type           Type of queue: execution or routing
+~~~
+{: .output}
+
+The **queue** column lists the name of the job queue.
+See [Queue Structure](https://opus.nci.org.au/display/Help/Queue+Structure) for a list of what all the queues are for and the hardware available for each, and [Queue Limits](https://opus.nci.org.au/display/Help/Queue+Limits) for a break down of the limits for each of the available queues.
+
+The **run** column shows how many jobs are currently running in that queue and the **que** column shows how many jobs are queued (waiting to run) for that queue.
+Together we can use these get a feel for which queues are busy/free.
+
 
 
 ## Running Jobs
-There are two types of jobs that can be run: either a batch job where SLURM executes a script on your behalf, or an interactive job whereby you are given direct access to a compute node and you can do things interactively.
+There are two types of jobs that can be run: either a batch job where PBSPro executes a script on your behalf, or an interactive job whereby you are given direct access to a compute node and you can do things interactively.
 
 
 ### Interactive jobs
 We will start with a simple **interactive** job.
-Use `salloc` to start an interactive job.
+Use `qsub -I -qnormal -lwalltime=00:05:00,storage=scratch/vp91` to start an interactive job.
 You should see a sequence of output as follows:
 ~~~
-[phancock@farnarkle2 oz983]$ salloc
-salloc: Pending job allocation 29294281
-salloc: job 29294281 queued and waiting for resources
-salloc: job 29294281 has been allocated resources
-salloc: Granted job allocation 29294281
-salloc: Waiting for resource configuration
-salloc: Nodes john16 are ready for job
-[phancock@farnarkle2 oz983]$ ssh john16
-[phancock@john16 ~]$ 
+[pjh562@gadi-login-01 ~]$ qsub -I -qnormal -lwalltime=00:05:00,storage=scratch/vp91
+qsub: waiting for job 76970825.gadi-pbs to start
+qsub: job 76970825.gadi-pbs ready
+
+[pjh562@gadi-cpu-clx-1891 ~]$
 ~~~
 {: .output}
 
-Note that salloc will create an allocation for us, but not always join us to the relevant node.
-To join the node we can use ssh.
-Note that my command prompt was still `@farnarkle2` (a login node), but i have to join `@john16` to access the allocated resources.
+Note that the prompt has changed to be `gadi-cpu-clx-1891` which tell us the name of the node we are working. 
+You will most likely get a different node name.
 
 When you finish with an interactive session you can exit it using `exit` or `<ctrl>+d` to end the ssh session, and then again to exit the job allocation.
 
 ~~~
-[phancock@john16 ~]$ squeue -u ${USER}
-             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
-          29294281   skylake interact phancock  R       1:20      1 john16
-[phancock@john16 ~]$ exit
-[phancock@farnarkle2 0z983]$ exit
-salloc: Job allocation 29294281 has been revoked.
-[phancock@farnarkle2 0z983]$
+[pjh562@gadi-cpu-clx-1891 ~]$ qstat -u ${USER} 
+
+gadi-pbs: 
+                                                                 Req'd  Req'd   Elap
+Job ID               Username Queue    Jobname    SessID NDS TSK Memory Time  S Time
+-------------------- -------- -------- ---------- ------ --- --- ------ ----- - -----
+76970825.gadi-pbs    pjh562   normal-* STDIN      20925*   1   1  500mb 00:05 R 00:02
+[pjh562@gadi-cpu-clx-1891 ~]$ exit
+logout
+
+qsub: job 76970825.gadi-pbs completed
+[pjh562@gadi-login-01 ~]$ 
 ~~~
 {: .output}
 
