@@ -4,12 +4,10 @@
 # Determine Andromeda location in ra/dec degrees
 import math
 import numpy as np
-import random
 import multiprocessing
-import uuid
 import sys
 
-nsrc = 1_000_000
+NSRC = 1_000_000
 
 
 def get_radec():
@@ -41,7 +39,7 @@ def make_positions(args):
     # return our results
     return radec
 
-def make_positions_parallel(ra, dec, nsrc=nsrc, cores=None):
+def make_positions_parallel(ra, dec, nsrc=NSRC, cores=None):
     
     # By default use all available cores
     if cores is None:
