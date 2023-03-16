@@ -37,7 +37,7 @@ See instructions on the [home page]({{page.root}}#Setup)
 You will need to have an account on the National Compute Infrastructure (NCI) in order to complete some of the exercises for this course.
 See [these instructions](https://my.nci.org.au/mancini/signup/0) for how you can obtain an account.
 
-Once you have an account you'll need to join the group FIXME.
+Once you have an account you'll need to join the group `vp91`.
 
 ## Assumed knowledge
 This course assumes that you have basic proficiency in python.
