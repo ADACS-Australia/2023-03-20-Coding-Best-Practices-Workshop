@@ -456,8 +456,8 @@ Lets now run through each part:
 
 ### 1 determine the number of processes to use
 We let the user specify a number of cores using the `cores` argument.
-If they don't specify a number (eg it's value is `None`) then we ask the multiprocessing library to count the number of cores.
-NB: this will sometimes be 2x the number of physical cores due to [hyperthreadding](https://en.wikipedia.org/wiki/Hyper-threading), but we don't mind if that happens.
+If they don't specify a number (eg it's value is `None`) then we ask the multiprocessing library to count the number of threads (physical CPUs + virtual CPUs) the CPU has available.
+NB: this will sometimes be 2x the number of physical cores due to [hyperthreadding](https://en.wikipedia.org/wiki/Hyper-threading) or [simultaneous multithreading](https://en.wikipedia.org/wiki/Simultaneous_multithreading), but we don't mind if that happens.
 ~~~
     # By default use all available cores
     if cores is None:
@@ -485,7 +485,7 @@ Note that in our list of `args`, each element is a tuple.
 ### 4 set up a pool of workers
 To manage all the processes that we are going to create and use, we need a context manager which we get from the multiprocessing module.
 From this manager we can then create a `Pool` of workers.
-We specify how many processes we wan to use and how many tasks each child process will execute.
+We specify how many processes we want to use and how many tasks each child process will execute.
 For our simple case we want only 1 task per child, this means that when a task is complete the python instance will shut down and new one will be started within that process.
 This helps to avoid any issues related to us not cleaning up after ourselves when we are done (memory leaks, residual state, etc).
 ~~~
@@ -972,9 +972,9 @@ mpirun -n 4 python3 sky_sim_mpi.py
 ~~~
 {: .language-bash}
 
-Whilst we can use our COMM_WORLD to pass messages between processes, it's a very inefective way to pass large quantities of data (see previous chat about serialization).
+Whilst we can use our COMM_WORLD to pass messages between processes, it's a very ineffective way to pass large quantities of data (see previous chat about serialization).
 One way to get around this issue is to have each process dump their work products in a shared directory and then have another program join all the work together.
-Sometimes this "other" program is jus the rank 0 process.
+Sometimes this "other" program is just the rank 0 process.
 This is the approach that we'll be taking today.
 
 With MPI we will need to do the following in our script:

@@ -48,3 +48,29 @@ Embrace sticky tape solutions:
 - Only write new code where none exists
 - Choose a language/framework that suits the problem
 - Optimize only when there is a problem 
+
+
+## leveraging the work of others
+There are a lot of python packages that are designed, directly or indirectly, to provide optimized python code.
+For example:
+- [Numpy](https://numpy.org/)
+  - The fundamental package for scientific computing with Python
+- [Scipy](https://scipy.org/)
+  - Fundamental algorithms for scientific computing in Python
+  - extends upon Numpy to provide additional data structures and algorithms
+- [Numba](https://numba.pydata.org/)
+  - an open source JIT compiler that translates a *subset* of Python and NumPy code into fast machine code.
+- [Dask](https://www.dask.org/)
+  - library for parallel computing in Python, with a focus on workflows and big data processing
+- [Taichi](https://www.taichi-lang.org/)
+  - a domain-specific language embedded in Python that helps you easily write portable, high-performance parallel programs
+- [Cython](https://cython.org/)
+  - an optimising static compiler for both the Python programming language and the extended Cython programming language
+  - write python code, convert it to c, compile, and run
+- [PyPy](https://www.pypy.org/)
+  - A fast, compliant alternative implementation of Python
+  - Not python modules will work in pypy, but many of the main one will
+- [pandas](https://pandas.pydata.org/)
+  - a fast, powerful, flexible and easy to use open source data analysis and manipulation tool, built on top of the Python programming language.
+
+These packages can provide significant performance increases, often by implementing parallel processing under the hood, without you having to write or manage any of the parallel computing components.
