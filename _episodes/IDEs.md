@@ -31,26 +31,56 @@ Other notable products which provide many/all the features of VSCode include:
 > If you have an "in the zone" playlist, link that too!
 {: .challenge}
 
-## IDE examples
+## VSCode examples
 
-TODO: Demo screen shots and discussion for the below
+### Python things
 
-Screenshots with some highlights of:
-- git panel, including in-document indications of what changes
-- live syntax highlighting and PEP recommendations
-  - missing modules
-  - unused imports, arguments, language aware spelling
-- code folding
-- in-document help for functions/classes
-- testing panel
-- multiple environment support
-- docker panel
-- support for multiple languages in a single project
-- remote coding (vis ssh)
+Can easily swap between environments, will automatically use `env` in the project directory.
+Can easily create environments.
+
+![VSCode Nice Python things]({{page.root}}{% link fig/VSCodePythonNice.png%})
+
+Also will show:
+- unused imports, 
+- variables that are never referenced, 
+- variables with confusing names,
+- variables that mirror global variables
+- missing doc strings
+- inline help for all modules/functions in current environment including **your** functions/classes/modules
+- prompt you to pip/conda install modules that you import but are in the current env
+
+Additionally you can fold blocks of code, which is great for long code bases.
+
+TODO: screenshot for testing, debugging
+
+### Git things
+![VSCode GitHub integration]({{page.root}}{%link fig/VSCodeGitIntegration.png%})
+
+![VSCode Git diff]({{page.root}}{%link fig/VSCodeGitDiff.png%})
+
+![VSCode GitGraph plugin]({{page.root}}{%link fig/VSCodeGitGraph.png%})
+
+### Docker
+
+![VSCode Docker plugin]({{page.root}}{%link fig/VSCodeDockerPlugin.png%})
+
+From this panel you can easily prune containers that have stopped but are not shut down.
+This is especially good when you have been building containers.
+
+### Other things
+Support for multiple languages in a single project, including multiple environments and linting etc.
+
+[Develop remotely using ssh](https://code.visualstudio.com/docs/remote/ssh):
+![VSCode remote](https://code.visualstudio.com/assets/docs/remote/ssh/architecture-ssh.png)
+This is **much** faster than running VSCode remotely and forwarding an X11 session.
+
+
+
 
 > ## Want more magic?
 > Go to [my project](https://github.com/PaulHancock/Aegean/blob/main/AegeanTools/MIMAS.py) and press '.'
-> > 
+> 
+> > ## Yes
 > > ![mega brain](http://www.reactiongifs.com/r/yjbmm.gif)
 > {: .solution}
 {: .challenge}
