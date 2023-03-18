@@ -285,6 +285,8 @@ $ docker build -t robbie:new .
 Where we used `robbie` as the container name and `new` as the tag.
 Typically people use either a version number (eg, v1.0) or `latest` as the tag, but any string will be accepted.
 
+TODO: link to docker playground thingo
+
 >## Let's build a container
 > Create a `Dockerfile` which will generate a container with this recipe:
 > - use python:3.8.5 as the base layer
