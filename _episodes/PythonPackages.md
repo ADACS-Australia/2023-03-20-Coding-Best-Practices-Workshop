@@ -1,13 +1,17 @@
 ---
 title: "Packaging code"
-teaching: 15
-exercises: 15
+teaching: 20
+exercises: 40
 questions:
-- "TODO"
+- "What is a python package or module?"
+- "How can I make my own python module?"
+- "How can I publish this module on pypi.org?"
 objectives:
-- "TODO"
+- "Understand the structure of a python module"
+- "Create a python modules which we can pip install"
 keypoints:
-- "TODO"
+- "Any reusable code can be made into a module"
+- "Uploading to pypi isn't essential for installing via pip"
 ---
 ## What is a python module?
 A python module is a library of code that can be distributed and used by others.
@@ -208,9 +212,9 @@ Essentially a script is just a command line interface for the code in your modul
 
 
 > ## Challenge write a script
-> - In the `scripts` folder create a new file called `sky_sim`.
-> - Copy the `if __main__` clause from our `sky_sim.py` file and put it into `sky_sim`
-> - `sky_sim` should import functions from `mymodule.sky_sim` as needed
+> - In the `scripts` folder create a new file called `runme`.
+> - Copy the `if __main__` clause from our `sky_sim.py` file and put it into `runme`
+> - `runme` should import functions from `mymodule.sky_sim` as needed
 > 
 > >
 > > ## Solution
@@ -317,6 +321,15 @@ setup(
 Now that the module has been installed you should be able to import this module from python regardless of which directory you are working in. 
 Similarly, because we provided `scripts=['scripts/runme']`, we should have access to this script from anywhere on our system.
 Try it out!
+
+> ## Installing directly from github
+> If you have the right structure in your repository on github, then pip can install directly from github using the follwing:
+> `pip install pip install git+https://github.com/[user]/[repo].git`
+>
+> You can even select a branch by appending `@branchname` to the github link!
+> 
+{: .callout}
+
 
 > ## Publishing a package on pypi
 > Once your code can be installed locally via `pip install -e .` then you are well on your path to being able to publish your code on the [pypi.org](pypi.org) index.
@@ -475,5 +488,5 @@ Once you have a license file GitHub will add a badge to the “About” section 
 > ## License your work
 > Use the GitHub tools described above to apply a new license to your project.
 >
-> `git pull` to your local repository when you are done so that your repo's are in sync.
+> `git pull` to your local repository when you are done so that your repos are in sync.
 {: .challenge}

@@ -1,13 +1,17 @@
 ---
 title: "Testing"
-teaching: 15
-exercises: 15
+teaching: 20
+exercises: 20
 questions:
-- "TODO"
+- "Why should I write tests?"
+- "How do I write tests?"
 objectives:
-- "TODO"
+- "Be able to write tests"
+- "Be able to run tests with pytest"
 keypoints:
-- "TODO"
+- "Testing reduces the number of bugs"
+- "If you don't test it, it might be broken"
+- "Testing is about having your code live up to it's *intended* use"
 ---
 
 ## Test your code
@@ -207,6 +211,11 @@ The drawback is that if the first test fails, the function will exit and the oth
 However, some tests will require that you do a fair bit of setup to create objects with a particular internal state, and that doing this multiple times can be time consuming.
 In this case you are probably better off doing the set up once and have multiple small tests bundled up into one function.
 
+There are many modules available which can help you with different kinds of testing.
+Of particular note for scientific computing is [numpy.testing](https://numpy.org/doc/stable/reference/routines.testing.html).
+`numpy.testing` has lots of convenience functions for testing related to numpy data types.
+Especially useful when you want things to be "close" or "equal to with a given precision".
+
 ## Testing modes
 
 Broadly speaking there are two classes of testing: functional and non-functional.
@@ -246,7 +255,7 @@ System testing is Integration testing, but with integration over the full softwa
 If software has a command line interface then system testing can be run as a sequence of bash commands.
 
 ### Performance testing
-Performance testing is an extension of benchmarking and profiling.
+Performance testing is an extension of benchmarking and profiling which we'll talk about [later]({{page.root}}{% link _episodes/BenchmarkingAndProfiling.md %}).
 During a performance test, the software is run and profiled and passing the test means meeting some predefined criteria.
 These criteria can be set in terms of:
 - peak or average RAM use
@@ -274,7 +283,7 @@ Supporting a diverse range of systems can add a large overhead to the developmen
 ## Developing tests
 Ultimately tests are put in place to ensure that the actual and desired operation of your software are in agreement.
 The actual operation of the software is encoded in the software itself.
-The *desired* operation of the software should also be recorded for reference and the best place to do this is in the user/developer documenation (see [below](#Documentation)).
+The *desired* operation of the software should also be recorded for reference and the best place to do this is in the user/developer documentation (see [below](#Documentation)).
 
 One strategy for developing test code is to write tests for each bug or failure mode that is identified.
 In this strategy, when a bug is identified, the first course of action is to develop a test case that will expose the bug.

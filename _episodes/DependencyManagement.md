@@ -1,14 +1,31 @@
 ---
 title: "Managing software dependencies"
 teaching: 15
-exercises: 15
+exercises: 20
 questions:
-- "TODO"
+- "What is a dependency?"
+- "What are virtual environments?"
 objectives:
-- "TODO"
+- "Create and manage a virtual environment"
+- "List dependencies for your code"
 keypoints:
-- "TODO"
+- "Listing dependencies makes your code more portable"
+- "Virtual environments are a great way to work with conflicting dependencies on the same machine"
 ---
+
+## Python dependencies
+As part of our best practice, we have learned not to repeat ourselves, and not to repeat others.
+This means we should be building on the success of others, by relying on known working solutions as much as possible.
+In a coding context, this means that your code will require a set of libraries to be installed so that you can draw on their functionality.
+These libraries are said to be dependencies for your code.
+The first step of managing dependencies is to know what they are (hint, look at all your `import` statements).
+The second step of managing dependencies is to be able to tell others what libraries (and versions) your code relies on, in a systematic way.
+
+There are two main package managers for python which take on the role of resolving dependency issues, as part of their install / uninstall utility.
+The package managers are [pip](https://pypi.org/project/pip/) and [Anaconda](https://www.anaconda.com/) (with it's many variants).
+
+An extremely useful features that both package managers provide is the ability to create, manage, and swap between, different sets of libraries using what we call virtual environments.
+
 ## Virtual environments
 From the python [documentation](https://docs.python.org/3/tutorial/venv.html):
 
@@ -22,7 +39,7 @@ From the python [documentation](https://docs.python.org/3/tutorial/venv.html):
 > 
 {: .quote}
 
-There are two ways to setup virtual environments and manage dependencies: using `pip` or using `anaconda`
+There are two ways to setup virtual environments and manage dependencies: using `pip` or using `anaconda`.
 
 ## venv, pip, and requirements.txt
 
@@ -170,3 +187,12 @@ dependencies:
     - -r requirements.txt
 ~~~
 {: .output}
+
+> ## List dependencies for our project
+> - Using either `pip` or `anaconda` list the python libraries that are required for our example project.
+> - Create either a `requirements.txt` or `environment.yaml` file with these dependencies in them.
+> - Create a 'fresh' environment using this dependency file in a directory called `env` in your project directory
+> - Modify your `.gitingore` file so that git won't try to version control your `env` directory
+> - Use `git status` to confirm that the directory has been ignored.
+> - Push your changes to github
+{: .challenge}

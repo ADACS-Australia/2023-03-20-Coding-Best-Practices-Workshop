@@ -1,13 +1,19 @@
 ---
 title: "Publishing code"
 teaching: 15
-exercises: 15
+exercises: 20
 questions:
-- "TODO"
+- "Why publish code?"
+- "What does 'publish' even mean?"
+- "Ok, so how and where can I publish my code?"
 objectives:
-- "TODO"
+- "Review the FAIR principles for software publishing"
+- "Be able to publish code to Zenodo and recieve a DOI"
+- "Be able to register your code on ASCL.net"
 keypoints:
-- "TODO"
+- "You deserve credit for all the work you do"
+- "Publishing code can help you increase your publication/citation rate"
+- "Publishing your code 'pays forward' the efforts of people who developed your dependencies"
 ---
 
 # Publishing code
@@ -137,3 +143,8 @@ ASCL.net is simply a place to register that some code exists and that you’d li
 ASCL.net is indexed by ADS so it will get a bibcode in ADS, which can then be used to generate a bibtex entry for people to use when citing your code.
 Another goal of ASCL.net is to make it easier for people to find your code in the first place.
 If you haven’t explored the code available here I recommend that you do so now – there are some gems.
+
+
+## Where else?
+Of course we have skipped the most logical place for us to publish our python code - `pypi.org`!
+In the next episode we'll cover just that.

@@ -6,6 +6,7 @@
 - [x] Review lessons for additional challenges
 - [x] review challenges for opportunities to use ether pad
 - [x] Wherever we make changes to code remind people to `git commit`
+- [x] Obtain morning tea supplies 
 
 ## Before Tuesday
 - [ ] alternative for people who can't make a .sif file in Containers (existing file)
@@ -14,8 +15,6 @@
 - [ ] Review lessons for additional challenges
 - [ ] review challenges for opportunities to use ether pad
 - [ ] Wherever we make changes to code remind people to `git commit`
-
-
 
 ## Before Wednesday
 
