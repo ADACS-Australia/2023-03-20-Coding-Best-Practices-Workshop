@@ -480,7 +480,7 @@ Additionally both platforms will allow you to set up Continuous Integration (CI)
 
 Consider creating a command line interface (CLI) for your code and providing an option of `--help` that gives users a quick into to the use of your code.
 
-```
+~~~
 import argparse
 
 ...
@@ -519,7 +519,7 @@ if __name__ == "__main__":
         for i in range(NSRC):
             print(f"{i:07d}, {ras[i]:12f}, {decs[i]:12f}", file=f)
     print(f"Wrote {options.out}")
-```
+~~~
 {: .language-python}
 
 With this in place we can test running the code with a few different options, including `--help` which is added by default.

@@ -1,7 +1,7 @@
 ---
 title: "Best Practices In Scientific Computing"
-teaching: 30
-exercises: 30
+teaching: 20
+exercises: 
 questions:
 - "What does best practice mean?"
 - "What should I be doing?"
@@ -40,7 +40,7 @@ Here are some guiding principles that should be followed when planning or writin
 | Don't repeat yourself        | When something works reuse it. Bundle repeated code into functions and call those functions. Bundle functions into modules that can be imported. Write simple (single intent) tools that can be easily incorporated into larger workflows.                                                                                                                                                                                                                                 |
 | Don't repeat others          | If something seems routine then there is almost always an existing solution that you can rely on. Look for existing libraries/modules or programs that you can make use of. Don't reinvent the wheel[^lessons]                                                                                                                                                                                                                                                             |
 | Document                     | You *will* forget what you did and why you did it. Write yourself a document that describes the problem you were trying to solve, the approach that you took, and how you solved it. If the solution is a script, then describe how to use the script including the inputs, what options are available, and what the output is. This can be a `README.md` file, docstrings (in python) or a pdf. The format is less important than the fact that the documentation exists. |
-| Test                         | Only the very lucky get things right the first time. Don't rely on luck. When you write a script, do something to convince yourself that it works. Manually inspecting results for a known example is form of testing. This of testing as validation.                                                                                                                                                                                                                      |
+| Test                         | Only the very lucky get things right the first time. Don't rely on luck. When you write a script, do something to convince yourself that it works. Manually inspecting results for a known example is form of testing (validation). Where possible automate testing.                                                                                                                                                                                                       |
 | Version control              | When moving towards a solution we often make a wrong turn. Use a version control system to create a 'checkpoint' or 'save point' that you can easily come back to if things go bad. You don't need to do pull requests, branching, merging, or upload your files to GitHub for version control to be useful.                                                                                                                                                               |
 | Avoid premature optimization | Optimization *can* save time in the term run but *always* costs time in the short term. Optimize *your* time by firstly solving the problem, and only engage in optimization after you find out that your code is taking too long or using too many resources[^xkcd].                                                                                                                                                                                                      |
 
@@ -58,7 +58,7 @@ The example project that we will be developing will simulate a catalogue of fore
 - Stars should have randomized sky positions around the Andromeda galaxy
 - Positions should fall within 1 degree of the central location
 - Each star should have a unique ID
-- The star ID and position should be saved in a csv file to be analysed by other programs
+- The star ID and position should be saved in a csv file to be analyzed by other programs
 
 This program is intended to be used by the developer and their research group which includes people who are not proficient python programmers.
 It is intended that the software will grow in capability and complexity only as needed to support a current research project.

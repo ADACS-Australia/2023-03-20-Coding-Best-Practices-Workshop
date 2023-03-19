@@ -138,7 +138,7 @@ We can have multiple exit points in our function, corresponding to the various w
 > Create a test for the above function that will raise an exception when the returned ra/dec are not correct.
 > 
 > > ## initial function
-> > ```
+> > ~~~
 > > def get_radec():
 > >     """
 > >     Generate the ra/dec coordinates of Andromeda
@@ -162,7 +162,7 @@ We can have multiple exit points in our function, corresponding to the various w
 > >     ra = 15*(int(h)+int(m)/60+float(s)/3600)
 > >     ra = ra/math.cos(dec*math.pi/180)
 > >     return ra,dec
-> > ```
+> > ~~~
 > > {: .language-python}
 > {: .solution}
 > 

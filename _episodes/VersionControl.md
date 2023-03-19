@@ -1,13 +1,16 @@
 ---
 title: "Version Control"
-teaching: 15
+teaching: 20
 exercises: 15
 questions:
-- "TODO"
+- "What is version control?"
+- "How is version control useful?"
 objectives:
-- "TODO"
+- "Put our sample project under version control"
+- "Understand what should and should not be version controlled"
 keypoints:
-- "TODO"
+- "Git it great!"
+- "Knowing that you can 'go back' should give you confidence to experiment"
 ---
 ## [Intro to Version Control](https://swcarpentry.github.io/git-novice/index.html)
 We'll start by exploring how version control can be used to keep track of what one person did and when.
@@ -48,6 +51,8 @@ Repositories can be kept in sync across different computers, facilitating collab
 >     you accept changes made using the `Track Changes` option? Do you have a 
 >     history of those changes?
 >
+> Share your thoughts and experience on the [etherpad]({{site.ether_pad}})
+>
 > > ## Solution
 > >
 > > *   Recovering the excellent version is only possible if you created a copy
@@ -82,21 +87,29 @@ Lets make a start on our project by keeping that first proof of concept script u
 > - Save your initial progress by creating a new commit to your repository via `git commit -m <message>`
 >   - The first commit message can be something simple like "initial version" or "proof of concept"
 > - Check that you have committed your progress by running `git log`
+>
+> If git gets your goat, have a yarn in the [etherpad]({{site.ether_pad}})
 {: .challenge}
 
 If at any point we are editing our work and we break something, or change our mind about what we are doing, so long as we have the files under version control we can go back to our previous save point using:
-```
+~~~
 git checkout -- <filename>
-```
+~~~
 {: .language-bash}
 
 If we want to reach way back in time we can do
-```
+~~~
 git checkout <hash> <filename>
-```
+~~~
 {: .language-bash}
 
 Where the `<hash>` is one of the long alphanumeric strings that are shown when we run `git log`.
 Having good commit messages will make it easier to tell which commit we should be going back to.
+
+> ## Small changes, often
+> It is good practice, where possible, to make many small commits rather than a few large commits.
+> This strategy will help you have a finer grained 'undo', and when you start branching and merging, it will result in fewer and smaller merge conflicts.
+> 
+{: .callout}
 
 Now we have some first step that we can come back to later if we mess things up.

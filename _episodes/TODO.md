@@ -1,6 +1,7 @@
 ## Before Monday
-- [ ] Update front page with zoom link
-- [ ] Send zoom/etherpad link to NCI folks
+- [x] Update front page with zoom link
+- [x] Update etherpad with links
+- [x] Send zoom/etherpad link to NCI folks
 - [ ] Go through all lessons and link to best practices where we can
 - [ ] Review all lessons for additional challenges
 - [ ] review all challenges for opportunities to use ether pad

@@ -26,7 +26,9 @@ Some of the content is intended for learners to read, think, and ask questions, 
 
 ## Required software / services
 You will need:
-- Access to Teams/Zoom video conferencing system (for remote participants, depending on which works on the day!)
+- Access to Zoom video conferencing system (for remote participants, depending on which works on the day!)
+  - [Join from PC, Mac, Linux, iOS or Android](https://unsw.zoom.us/j/86138935425?pwd=dXBpVC9nWnh5RnBSWmpGUlpRSUc0QT09) 
+  - Password: see [etherpad]({{site.ether_pad}})
 - A bash terminal
 - An account on NCI  (see below)
 - A zest for life
@@ -106,5 +108,5 @@ See the [ASA2022 code of conduct](https://www.asa2022.org/code-of-conduct) and t
 > 
 > Introduce yourself to your peers by telling us your name, a band you are listening to at the moment, and your favorite kind of pet.
 > 
-> Do this in person and via the etherpad.
+> Do this in person and via the [etherpad]({{site.ether_pad}}).
 {: .challenge}

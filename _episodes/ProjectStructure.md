@@ -3,11 +3,14 @@ title: "Project Structure"
 teaching: 15
 exercises: 15
 questions:
-- "TODO"
+- "How do I start a new project?"
+- "What can I do early in a project to make my life easier later on?"
 objectives:
-- "TODO"
+- "Understand the utility of a planned project structure"
+- "Create a new project plan"
 keypoints:
-- "TODO"
+- "Planning is important"
+- "Project structure will help you organize your work"
 ---
 
 ## Beginning a new software project
@@ -28,11 +31,11 @@ The location of this directory will depend on a higher level organization scheme
 For example you may separate your projects based on funding, based on collaboration, or based on research area.
 
 Within you software project directory we recommend the following structure:
-```
+~~~
 .
 ├── README.md          <- Description of this project
 ├── bin                <- Your compiled code can be stored here (not tracked by git)
-├── config             <- Configuration files, e.g., for doxygen or for your model if needed
+├── config             <- Configuration files, e.g., for sphinx or for your model if needed
 ├── data
 │   ├── external       <- Data from third party sources.
 │   ├── interim        <- Intermediate data that has been transformed.
@@ -46,13 +49,14 @@ Within you software project directory we recommend the following structure:
 └── src                <- Source code for this project
     ├── external       <- Any external source code, e.g., pull other git projects libraries
     └── tools          <- Any helper scripts go here
-```
+~~~
 {: .output}
 
 Setting up an empty structure such as the above can be done either by making an template and then copying that every time you start a new project.
 Additionally there are python packages such as `cookiecutter` ([pypi](https://pypi.org/project/cookiecutter/), [rtfd](https://cookiecutter.readthedocs.io/en/1.7.2/), [github](https://github.com/audreyfeldroy/cookiecutter-pypackage)) that can automate this process for you, and offer a range of templates to work with.
 
 ### Name all files to reflect their content or function.
+(Recall: Naming is important)
 
 It is also convenient to use a consistent and descriptive naming format for all your files and sub-folders. For example, use names such as `galaxy_count_table.csv`, `manuscript.md`, or `light_curve_analysis.py`.
 Do not using sequential numbers (e.g., `result1.csv`, `result2.csv`) or a location in a final manuscript (e.g., `fig_3_a.png`), since those numbers will almost certainly change as the project evolves (and are meaningless on their own).

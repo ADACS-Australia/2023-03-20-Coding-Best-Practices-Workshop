@@ -76,11 +76,11 @@ Now we connect the two repositories.
 We do this by making the GitHub repository a `remote` for the local repository.
 
 The blank repo on GitHub shows us the command that we need to do this:
-```
+~~~
 git remote add origin git@github.com:PaulHancock/symmetrical-octo-parakeet.git
 git branch -M main
 git push -u origin main
-```
+~~~
 {: .language-bash}
 
 Make sure to use the URL for your repository rather than Paul's.
