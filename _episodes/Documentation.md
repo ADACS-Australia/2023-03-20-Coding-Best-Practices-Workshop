@@ -3,11 +3,16 @@ title: "Documentation"
 teaching: 15
 exercises: 15
 questions:
-- "TODO"
+- "Why would I document my code?"
+- "How do I document my code?"
 objectives:
-- "TODO"
+- "Learn how to use python comments and doc-strings"
+- "Understand the different types of documentation and audiences"
 keypoints:
-- "TODO"
+- "Undocumented code has a steep learning curve, and many people will quit before they begin"
+- "If people ask questions about your code, write the answer in the wiki and link them to it"
+- "Write a love letter to your future self"
+- "Documentation helps with expectation management"
 ---
 # Documentation
 To avoid simulating the entire python interpreter in our minds, it is often easier to document the (intended) behavior of our code in a human readable format.
@@ -16,7 +21,7 @@ Python offers the builtin function `help()` to display the documentation for a g
 Let's try that now.
 > ## Challenge: Get some help
 >
-> Get some help on the python builtin function `enumerate`
+> Get some help on the python builtin function `open`
 >
 > 
 > ~~~
@@ -49,6 +54,7 @@ Let's try that now.
 > >     dependent: locale.getpreferredencoding(False) is called to get the
 > >     current locale encoding. (For reading and writing raw bytes use binary
 > >     mode and leave encoding unspecified.) The available modes are:
+> > ...
 > > ~~~
 > > {: .output}
 > {: .solution}
@@ -56,7 +62,7 @@ Let's try that now.
 
 Where does `help()` get all this information from?
 
-In part, the information provided by help is part of the *docstring* for the enumerate function.
+In part, the information provided by help is part of the *docstring* for the `open` function.
 We can view the docstring by viewing the `__doc__` attribute of the function as follows:
 
 > ## Example
@@ -84,13 +90,16 @@ We can view the docstring by viewing the `__doc__` attribute of the function as 
 > > dependent: locale.getpreferredencoding(False) is called to get the
 > > current locale encoding. (For reading and writing raw bytes use binary
 > > mode and leave encoding unspecified.) The available modes are:
+> > ...
 > > ~~~
 > > {: .output}
 > {: .solution}
 {: .challenge}
 
-Compare the help shown above to the official python documentation [here](https://docs.python.org/3/library/functions.html#enumerate).
+Compare the help shown above to the official python documentation [here](https://docs.python.org/3/library/functions.html#open).
 
+
+When we get to the [IDE episode]({{page.root}}{% link _episodes/IDEs.md %}), we'll see some more places that this help text shows up.
 
 ## Documentation vs commenting
 There are two ways in which you can and should describe your code - documentation and commenting.
@@ -101,19 +110,28 @@ Quite simply:
 > Documentation is a love letter that you write to your future self.
 >
 > -- Damian Conway
-
+{: .quote}
 
 ## Comments
 Comments should include design decisions, or explanations of difficult to interpret code chunks.
 Comments can include known/expected bugs or shortcomings in the code.
 Things that are not yet implemented, or hacks that deal with bugs in other modules, should also be in comments.
+Comments are also a good place to reference where you saw a particular idea/approach or even code that you have copied:
+~~~
+def very_smart_function():
+    # This function is a modified version of <stackoverflow perma link>
+    ...
+    return
+~~~
+{: .language-python}
+
 Python comments come in two flavours: a single or part line comment which begins with a `#`, or a multiline comment which is any string literal.
 
 ~~~
 
 '''
 A comment that covers more than one line
-because it is just so long
+because it is just soooooo long
 '''
 
 def my_func(num):
@@ -134,18 +152,21 @@ dict = {'key1': 0, # note about this item
 def my_func(num,
             ax,            # a matplotlib axes object
             verbose=True,  # TODO update to be logger.isEnabledFor(logging.DEBUG)
-            **kwargs)
+            **kwargs):
+    ...
+    return
 ~~~
 {: .language-python}
 
 When python is interpreted (or compiled to byte-code), the interpreter will *ignore* the comments.
 The comments therefore only exist in the source code.
 Commenting your code has no effect on the behavior of your code, but it will (hopefully) increase your ability to understand what you did.
+(Remember: Clarity is important).
 Because the comments are ignored by the python interpreter only people with access to your source code will read them (developer usually), so this is a bad place to describe how your code should be *used*.
 For notes about code *usage* we instead use documentation.
 
 ## Docstrings
-Python provides a way for use to document the code inline, using [docstrings](https://www.python.org/dev/peps/pep-0257/).
+Python provides a way for us to document the code inline, using [docstrings](https://www.python.org/dev/peps/pep-0257/).
 Docstrings can be attached to functions, classes, or modules, and are defined using a simple syntax as follows:
 
 > ## Example
@@ -157,6 +178,7 @@ Docstrings can be attached to functions, classes, or modules, and are defined us
 >   The only constraint is that I start and end with tripe quotes (' or ")
 >   I can use multi-line strings like this, or just a single line string if I prefer.
 >   """
+>   ...
 >   return
 > ~~~
 > {: .language-python}
@@ -165,13 +187,14 @@ Docstrings can be attached to functions, classes, or modules, and are defined us
 Docstrings can be any valid string literal, meaning that they can be encased in either single or double quotes, but they need to be triple quoted.
 Raw and unicode strings are also fine.
 
-Docstrings can be included anywhere in your code, however unless they immediately follow the beginning of a file (for modules) or the definition of a class or function, they will be ignored by the compiler.
-The docstrings which are defined at the start of a module/class/function will be saved to the `__doc__` attribute of that object, and can be accessed by normal python introspection.
+Docstrings can be included anywhere in your code, however unless they immediately follow the beginning of a file (for modules) or the definition of a class or function, they will be ignored by the compiler (treated as a comment).
+The docstrings which are defined at the start of a module/class/function will be saved to the `__doc__` attribute of that object, and can be accessed by normal python [introspection](http://en.wikipedia.org/wiki/Type_introspection).
 
 ### Docstring formats
 While it is possible to include any information in any format within a docstring it is clearly better to have some consistency in the formatting.
+(Remember: Clarity is important)
 
-There are, unfortunately, many 'standard' formats for python documentation, though they are all similarly human readable so the difference between the formats is mostly about consistency and automated documentation (see [day 3 lessons](../03-Bringing-it-all-together)).
+There are, unfortunately, many 'standard' formats for python documentation, though they are all similarly human readable so the difference between the formats is mostly about consistency and automated documentation.
 
 Scipy, Numpy, and astropy, all use the [numpydoc](https://numpydoc.readthedocs.io/en/latest/format.html) format which is particularly easy to read.
 We will be working with the numpydoc format in this workshop.
@@ -324,7 +347,9 @@ As such every docstring should contain at least a one line statement that shows 
 
 > ## Document get_radec v1
 > For our `get_radec` function that we created earlier, add a few lines of documentation to describe the intent of the function.
-> > ## Solution
+>
+> `git commit` your changes when you are happy with them
+> > ## (partial) Solution
 > > ~~~
 > > def get_radec():
 > >     """
@@ -360,6 +385,8 @@ If the function modifies an input but does not return the modified version as an
 
 > ## Document get_radec v2
 > Extend our documentation for `get_radec` so that it includes a Returns section.
+>
+> `git commit` your changes when you are happy with them
 > > ## Solution
 > > ~~~
 > > def get_radec():
@@ -393,13 +420,13 @@ If the function modifies an input but does not return the modified version as an
 ### Optional documentation
 The type of errors that are raised, and under what conditions, can be documented in the `Raises` section.
 
-`Notes`, `References`, and `Examples`, are also useful sections but usually applicable to all functions or classes that you will be writing.
+`Notes`, `References`, and `Examples`, are also useful sections but not usually applicable to all functions or classes that you will be writing.
 If I have used code snippets from stack-overflow or similar, then I find `Notes`/`References` section to be a good place to acknowledge and link to those resources.
 
 The `Examples` section can be used to show intended use.
-There is an automated testing suite called [doctest](https://docs.python.org/3/library/doctest.html) which will scan your docstrings looking for segments starting with `>>>` and then running those segments in an interactive python interpreter.
+There is an automated testing suite called [doctest](https://docs.python.org/3/library/doctest.html) which will scan your docstrings looking for segments starting with `>>>` and then run those segments in an interactive python interpreter.
 A solid test suite will typically contain many tests for a single function, thus trying to embed all the tests into your docstrings just makes for very long docstrings.
-It is preferable to keep your testing code in the `tests` module/directory of your python module, and to use the `Examples` section only for demonstrating functionality to the end user.
+It is preferable to keep your testing code in the `tests` module/directory of your python module (see the episode on [testing]({{page.root}}{% link _episodes/Testing.md %})), and to use the `Examples` section only for demonstrating functionality to the end user.
 
 ## Making use of documentation
 Some IDEs (the good ones) provide syntax highlighting, linting, and inline help as you write code.
@@ -442,7 +469,7 @@ The simplest to use is the `pdoc` package which can be obtained from [pypi.org](
 > Install the pdoc module and then run it on our documented code using:
 > ~~~
 > pip install pdoc
-> pdoc ./scripts/sky_sim.py
+> pdoc ./mymodule/sky_sim.py
 > ~~~
 > {: .language-bash}
 >
@@ -450,17 +477,21 @@ The simplest to use is the `pdoc` package which can be obtained from [pypi.org](
 > This should be opened in your browser by default but if it isn't you can navigate to `localhost:8080` or `127.0.0.1:8080`.
 > Use `<ctrl>+C` when you want to stop the web server.
 > 
-> Have an explore of the documentation so far and see how your docstrings map onto what is being shown on the web-pages.
+> Have an explore of the documentation so far and see how your docstring(s) map onto what is being shown on the web-pages.
 {: .challenge}
 
 
 To make documentation that is less ephemeral you can use the the `-d docs` option to cause all the documentation to be built and then placed into the `docs` folder.
 `pdoc` only supports `html` output, however other auto-documentation packages such as [sphinx](https://www.sphinx-doc.org/en/master/) can write latex (and thus pdf), ePub, man pages, or plain text.
 
+If you have automatically generated documentation then it you can set up a link between your github repo and a [read the docs ](rtfd.io) site.
+See their [tutorial](https://docs.readthedocs.io/en/stable/tutorial/) on how to do this.
+
 
 ## Other forms of documentation
 
 Compiling all your docstrings into an easy to find and navigate website is great, but this typically does not do a good job of documenting your software project as a whole.
+In fact this is more like describing a public API.
 What is required here is something that deals with the intent of the software, a description of the problem that it is solving, and how users can install and begin to use the software.
 For this you have a few options:
 - a `README.md` in your repository
@@ -473,12 +504,21 @@ Within any of the above you would want to include things such as:
 - a Frequently Asked Questions (FAQ) section to address common problems
 - tutorials to demonstrate some of the key features of your software (Jupyter notebooks are great here)
 
-GitHub and GitLab both provide a wiki for each project.
+GitHub and GitLab both provide a wiki for each repository.
 Additionally both platforms will allow you to set up Continuous Integration (CI) tools that will automatically build and publish your documentation to a third party website.
+
+> ## your github repo wiki is also a repo
+> - If you have a github repository at https://github.com/[user]/[repo].git, then you can clone the wiki corresponding to that repository from https://github.com/[user]/[repo].wiki.git
+> - The wiki uses markdown formatting to render the pages.
+> - You can of course still use the online editor to update the wiki, which is nice, because it has a 'preview' button.
+{: .callout}
+
 
 ## CLI and `--help`
 
-Consider creating a command line interface (CLI) for your code and providing an option of `--help` that gives users a quick into to the use of your code.
+Consider creating a command line interface (CLI) for your code and providing an option of `--help` that gives users a quick intro to the use of your code.
+
+For example we could add a CLI to our `sky_sim` script as follows:
 
 ~~~
 import argparse
@@ -506,6 +546,7 @@ def skysim_parser():
 if __name__ == "__main__":
     parser = skysim_parser()
     options = parser.parse_args()
+    # if ra/dec are not supplied the use a default value
     if None in [options.ra, options.dec]:
         ra, dec = get_radec()
     else:
@@ -524,3 +565,10 @@ if __name__ == "__main__":
 
 With this in place we can test running the code with a few different options, including `--help` which is added by default.
 
+> ## Make a CLI
+> - Copy or adapt the example above to create a CLI for your `sky_sim` script.
+> - Test that it works by running it with a few different combinations of ra/dec/out
+> - Use the [etherpad]({{site.ether_pad}}) to suggest one more option that you might add to this CLI. (No need to implement it).
+> 
+> When you are happy with your code commit the changes to your repo.
+{: .challenge}

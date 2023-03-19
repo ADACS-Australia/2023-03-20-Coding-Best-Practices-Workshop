@@ -2,10 +2,10 @@
 - [x] Update front page with zoom link
 - [x] Update etherpad with links
 - [x] Send zoom/etherpad link to NCI folks
-- [ ] Go through lessons and link to best practices where we can
-- [ ] Review lessons for additional challenges
-- [ ] review challenges for opportunities to use ether pad
-- [ ] Wherever we make changes to code remind people to `git commit`
+- [x] Go through lessons and link to best practices where we can
+- [x] Review lessons for additional challenges
+- [x] review challenges for opportunities to use ether pad
+- [x] Wherever we make changes to code remind people to `git commit`
 
 ## Before Tuesday
 - [ ] alternative for people who can't make a .sif file in Containers (existing file)

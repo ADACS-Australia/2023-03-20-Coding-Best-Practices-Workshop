@@ -3,19 +3,37 @@ title: "Using GitHub"
 teaching: 15
 exercises: 15
 questions:
-- "TODO"
+- "Why use an online repo like GitHub or GitLab?"
+- "How do I create a new github repo?"
+- "How do C sync my existing repo to GitHub?"
 objectives:
-- "TODO"
+- "Create an an empty GitHub repo"
+- "Connect our local repo the one on GitHub"
+- "Synchronize the two repositories"
 keypoints:
-- "TODO"
+- "An online git hosting service can act as an off-site back up for your work"
+- "If you don't want to share (or can't) then you can set the repositories to private"
+- "Having your work online makes it easy for you to work from multiple devices"
+- "When your work is online you can shamelessly plug it while teaching!"
 ---
+
+## Why use an online repository
+There are a number of reasons why an online repository can be useful:
+- Having your code on multiple machines reduces the chances of you loosing your work
+- Services like GitHub give you control over who sees and can access your work, through private/public listings
+- Services like GitHub often come with additional tools that are super useful for development including:
+  - Automation tools for building/testing/documenting/deploying your work
+  - A place to store and present documentation
+  - The ability to connect with third party vendors to provide additional services such as: testing, code review, security warnings, publishing to code indexes, and archiving.
+- Pushing your code to a site like github is the simplest way to publish your code and get the recognition you deserve (see our episode on [publishing]({{page.root}}{% link _episodes/PublishingCode.md %}))
+
 ## Setting up for GitHub
 
-Accounts are free, so [signup](https://github.com/signup) for one.
+Accounts are free, so [signup](https://github.com/signup) for one (or just follow along for now).
 
-When we use Git on a new computer for the first time, we need to configure a few things.
+When we use `git` on a new computer for the first time, we need to configure a few things.
 
-On a command line, Git commands are written as `git verb options`, where `verb` is what we actually want to do and `options` is additional optional information which may be needed for the `verb`.
+On a command line, git commands are written as `git verb options`, where `verb` is what we actually want to do and `options` is additional optional information which may be needed for the `verb`.
 So here is how you can setup git for the first time on your computer:
 
 ~~~
@@ -26,6 +44,7 @@ $ git config --global user.email "paul.hancock@curtin.edu.au"
 
 Please use your own name and email address.
 This user name and email will be associated with your subsequent Git activity, which means that any changes pushed to [GitHub](https://github.com/), [BitBucket](https://bitbucket.org/), [GitLab](https://gitlab.com/) or another Git host server after this lesson will include this information.
+Note that the user name and email are not used for authentication, so you could use my details if you liked, but it would look like I was doing your work!
 
 For this lesson, we will be interacting with [GitHub](https://github.com/) and so the email address used should be the same as the one used when setting up your GitHub account.
 If you are concerned about privacy, please review [GitHub's instructions for keeping your email address private](https://help.github.com/articles/keeping-your-email-address-private/). 
@@ -41,7 +60,7 @@ If you are concerned about privacy, please review [GitHub's instructions for kee
 Version control really comes into its own when we begin to collaborate with other people.
 We already have most of the machinery we need to do this; the only thing missing is to copy changes from one repository to another.
 
-Systems like Git allow us to move work between any two repositories.
+Systems like git allow us to move work between any two repositories.
 In practice, though, it's easiest to use one copy as a central hub, and to keep it on the web rather than on someone's laptop.
 Most programmers use hosting services like [GitHub](https://github.com), [Bitbucket](https://bitbucket.org) or [GitLab](https://gitlab.com/) to hold those main copies.
 

@@ -202,5 +202,5 @@ Let's revisit our proof of concept code and apply the above structure.
 > ## Use functions
 > - Update POC to use two functions: one to generate the positions, and one to save them to a file
 > - Have a very short "main" clause to run the code.
-> `git commit` with a useful message when you are done
+> - `git commit` with a useful message when you are done
 {: .challenge}
