@@ -456,15 +456,14 @@ Singularity offers multiple ways to interact with a container:
 - shell - drops you into an interactive shell within the container (similar to exec with `/usr/bin/bash` as args)
 
 > ## Run your singularity image
-> If you have access to either NCI, attempt the following:
+> If you have built a `test.sif` image, attempt the following:
 > 1. Copy your `test.sif` file to your HPC of choice.
 > 2. Login to NCI
-> 3. Use `module load` to load singularity/apptainer
+> 3. Use `module load` to load `singularity/apptainer`
 > 4. Try the singularity run/exec/shell commands on your container
 >
 > Reach out via the [etherpad]({{site.ether_pad}}) or raise your hand if you have questions or get stuck.
 > > ## Example
-> > TODO: update for NCI
 > > ~~~
 > > scp test.sif nci:/scratch/vp91/pjh562/.
 > > ssh nci

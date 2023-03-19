@@ -148,7 +148,7 @@ Next level is to provide a package/module with all these helpful bits of code.
 Related to DRY is the DRO principle of Don't Repeat Others, or simply don't re-invent the wheel.
 There is a lot of already existing code available that will probably do most of what you need.
 Instead of remaking a solution from scratch (and having to test/debug/maintain it) you should just `pip install` the package that does what you need.
-Have a look on [pypi.org](https://pypi.org/) for packages of interest, or ask you colleagues, or [stack overflow](https://stackoverflow.com/).
+Have a look on [pypi.org](https://pypi.org/) for packages of interest, or ask your colleagues, or [stack overflow](https://stackoverflow.com/).
 
 
 > ## Use functions

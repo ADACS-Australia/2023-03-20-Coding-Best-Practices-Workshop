@@ -30,7 +30,7 @@ These would be functions like `int()` which would parse a string into an integer
 We have already created some of our own functions earlier in this workshop.
 
 ## Functional or OO programming?
-Python allows us to work in an OO paradigm, but also in a functional or programatic paradigm.
+Python allows us to work in an OO paradigm, but also in a functional or programmatic paradigm.
 (In fact we are able to use a hybrid as well).
 Note that PEP8 doesn't make any recommendation about which of these paradigms should be used!
 

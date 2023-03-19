@@ -21,9 +21,14 @@ Not because we are shills for microsoft, but because VSCode is genuinely excelle
 
 Other notable products which provide many/all the features of VSCode include:
 - [Pycharm](https://www.jetbrains.com/pycharm/) (and the rest of the JetBrains suite TBH)
-- TODO that thing that Leigh uses a lot - [kate](https://kate-editor.org/)?
-- TODO one more thing to demonstrate this isn't just a VSCode love fest
+- [kate](https://kate-editor.org/)
+- [ecplise](https://www.eclipse.org/downloads/) (mostly Java focused)
+- [atom](https://github.com/atom) (precursor to VSCode, now sunset)
+- [sublime text](https://www.sublimetext.com/)
+- [code::blocks](http://www.codeblocks.org/)
+- [JupyterLab](https://jupyter.org/) (not just for notebooks!)
 
+No matter which of the IDEs you use, you should have a look at the plugins/extensions that are available as they can add a huge amount of functionality.
 
 > ## What do you use?
 > Please list the IDEs that you use (favorite or not), on the [etherpad]({{site.ether_pad}})
@@ -51,7 +56,7 @@ Also will show:
 
 Additionally you can fold blocks of code, which is great for long code bases.
 
-TODO: screenshot for testing, debugging
+![VSCode python testing]({{page.root}}{% link fig/VSCodeTesting.png%})
 
 ### Git things
 ![VSCode GitHub integration]({{page.root}}{%link fig/VSCodeGitIntegration.png%})
@@ -74,8 +79,15 @@ Support for multiple languages in a single project, including multiple environme
 ![VSCode remote](https://code.visualstudio.com/assets/docs/remote/ssh/architecture-ssh.png)
 This is **much** faster than running VSCode remotely and forwarding an X11 session.
 
+Or using [remote tunnels](https://code.visualstudio.com/docs/remote/tunnels) instead of ssh (with a GitHub account):
+![Remote dev without ssh](https://code.visualstudio.com/assets/docs/remote/vscode-server/server-arch-latest.png)
 
 
+> ## What features do you wish existed?
+> Use the [etherpad]({{site.ether_pad}}) to describe a feature that you'd love to see in your IDE.
+>
+> Browse the list and see if you can help people out!
+{: .challenge}
 
 > ## Want more magic?
 > Go to [my project](https://github.com/PaulHancock/Aegean/blob/main/AegeanTools/MIMAS.py) and press '.'

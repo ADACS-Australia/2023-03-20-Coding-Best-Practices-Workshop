@@ -1062,7 +1062,7 @@ There are two inefficiencies that we have in the above code:
   - If we did some point to point communication we could tell rank 0 to start reading the rank 1 file as soon as it was ready
 
 MPI can sometimes be a much simpler approach than shared memory, even when you are working on multiple cores of the same node.
-Sometimes MPI is an abosulte brain destroyer when you are trying to debug it, because all your debug messages overlap or appear out of order.
+Sometimes MPI is an absolute brain destroyer when you are trying to debug it, because all your debug messages overlap or appear out of order.
 
 At the end of the day you should chose a solution that will work for your use case which includes one that you can implement in a reasonable amount of time.
 (Your time is more valuable than computer time!)
