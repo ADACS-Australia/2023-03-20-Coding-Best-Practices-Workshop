@@ -66,6 +66,10 @@ INTRODUCTION
 Edit the general explanatory paragraph below if you want to change
 the pitch.
 {% endcomment %}
+<p> This workshop was developed by <a href="https://adacs.org.au/">ADACS</a> as training project for our <a href="https://adacs.org.au/software-services/merit-allocation-program-application/">Merit Allocation Program</a>.
+The training was developed in collaboration with the proposers of the project: Drs Caroline Foster, Nandini Sahu, and Cristina Martinez-Lombilla. 
+The workshop is developed in the style of a data carpentries workshop.</p>
+
 {% if site.carpentry == "swc" %}
 {% include swc/intro.html %}
 {% elsif site.carpentry == "dc" %}
