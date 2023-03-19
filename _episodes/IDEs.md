@@ -63,6 +63,10 @@ Additionally you can fold blocks of code, which is great for long code bases.
 
 ![VSCode Git diff]({{page.root}}{%link fig/VSCodeGitDiff.png%})
 
+![VSCode Git merge classic]({{page.root}}{% link fig/VSCodeMergeClassic.png%})
+
+![VSCode Git merge 3 way view]({{page.root}}{% link fig/VSCodeMergeAdvanced.png %})
+
 ![VSCode GitGraph plugin]({{page.root}}{%link fig/VSCodeGitGraph.png%})
 
 ### Docker
