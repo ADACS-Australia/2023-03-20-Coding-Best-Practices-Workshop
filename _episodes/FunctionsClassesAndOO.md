@@ -34,6 +34,19 @@ These would be functions like `int()` which would parse a string into an integer
 
 We have already created some of our own functions earlier in this workshop.
 
+## Classes in python
+The how/when/why of using classes in python is a long discussion.
+Any program that you can write that uses classes can be written without using classes (and vice-versa).
+
+This means that you can get by without ever creating your own classes in python, however there are a few instances where a small class can be a quick and easy fix:
+- A data class that holds information about an entity, but doesn't define any functions.
+  - e.g. a `Galaxy` class that attributes like 'redshift', 'ra', 'dec', 'name'
+  - These are super easy to make with the [dataclass](https://docs.python.org/3/library/dataclasses.html) module / decorator
+- A config class that holds a bunch of configuration settings for your code.
+  - Passing a "config" object to a function is easier than setting 10+ arguments.
+- A position class that is created with ra/dec coordinates but has functions that return the coords in different formats (though see [astropy.SkyCoord](https://docs.astropy.org/en/stable/api/astropy.coordinates.SkyCoord.html))
+
+
 ## Functional or OO programming?
 Python allows us to work in an OO paradigm, but also in a functional or programmatic paradigm.
 (In fact we are able to use a hybrid as well).
