@@ -171,6 +171,7 @@ episode_order:
   - PythonPackages
   - FunctionsClassesAndOO
   - Containers
+  - GitWorkFlow
   - IDEs
   - WhatIsHPC
   - WorkingOnAnHPC
