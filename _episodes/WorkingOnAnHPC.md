@@ -272,7 +272,23 @@ Lets run a basic hello world script, watch it run, and then pick apart what happ
 > ## The bash script
 > `/scratch/vp91/pjh562/scripts/first_script.sh`
 > ~~~
-
+> #! /usr/bin/env bash
+> #
+> #PBS -N hello
+> #PBS -o output.txt
+> #PBS -e error.txt
+> #
+> #PBS -l walltime=00:05:00
+> #PBS -l mem=200MB
+> 
+> # load the python module
+> module load python/3.8.5
+> 
+> # move to the work directory
+> cd /scratch/vp91/${USER}
+> # do the work
+> python3 ../pjh562/scripts/hello.py | tee hello.txt
+> sleep 120
 > ~~~
 > {: .language-bash}
 {: .callout}
@@ -356,43 +372,46 @@ If we think about the work that we need to do as discrete jobs, and then join mu
 
 Below is a generic workflow with just three parts.
 
-![WorkFlow]({{ page.root}}{% link /fig/SimpleFlow.png%})
+![WorkFlow]({{page.root}}{% link fig/SimpleFlow.png%})
 
 The purple boxes represent work that needs to be done, and the arrows represent dependency of tasks.
-You cannot process the data until you have retrieved the data, and you have to process the data *before* you do the cleanp.
+You cannot process the data until you have retrieved the data, and you have to process the data *before* you do the cleanup.
 
 In the above diagram we would say that there is a **dependency** between the tasks, as indicated by the arrows.
 Slurm allows us to create these dependency links when we schedule jobs so that we don't have to sit around waiting for something to complete before submitting the next job.
-When we schedule a job with `sbatch` we can use the `-d` or `--dependency` flag to indicate these links between our jobs.
+When we schedule a job with `qsub` we can use the `-W depend` flag to indicate these links between our jobs.
 
 > ## Dependency example
 > Try the following in your directory.
 > Remember to replace the `123456` with the actual job id that is returned to you
 > ~~~
-> [user@host mydir]$ sbatch ../KLuken_HPC_workshop/first_script.sh
-> Submitted batch job 123456
-> [user@host mydir]$ sbatch -d afterok:123456 ../KLuken_HPC_workshop/second_script.sh
-> [user@host mydir]$ squeue -u ${USER}
+> [pjh562@gadi-login-04 pjh562]$ qsub scripts/first_script.sh 
+> 77479068.gadi-pbs
+> [pjh562@gadi-login-04 pjh562]$ qsub -W depend=afterok:77479068 scripts/second_script.sh 
+> 77479087.gadi-pbs
+> [pjh562@gadi-login-04 pjh562]$ qstat -u ${USER}
 > ~~~
 > {: .output}
 > > ## Example output
 > > ~~~
-> > [phancock@farnarkle1 phancock]$ sbatch ../KLuken_HPC_workshop/first_script.sh
-> > Submitted batch job 29442667
-> > [phancock@farnarkle1 phancock]$ sbatch -d afterok:29442667 ../KLuken_HPC_workshop/second_script.sh
-> > Submitted batch job 29442668
-> > [phancock@farnarkle1 phancock]$ squeue -u ${USER}
-> >              JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
-> >           29442668   skylake no_hello phancock PD       0:00      1 (Dependency)
-> >           29442667   skylake    hello phancock PD       0:00      1 (Priority)
+> > [pjh562@gadi-login-04 pjh562]$ qsub scripts/first_script.sh 
+> > 77479068.gadi-pbs
+> > [pjh562@gadi-login-04 pjh562]$ qsub -W depend=afterok:77479068 scripts/second_script.sh 
+> > 77479087.gadi-pbs
+> > [pjh562@gadi-login-04 pjh562]$ qstat -u ${USER}
+> > Job ID               Username Queue    Jobname    SessID NDS TSK Memory Time  S Time
+> > -------------------- -------- -------- ---------- ------ --- --- ------ ----- - -----
+> > 77479068.gadi-pbs    pjh562   normal-* hello         --    1   1  200mb 00:05 Q   --
+> > 77479087.gadi-pbs    pjh562   normal-* no_hello      --    1   1  200mb 00:05 H   --
+> > 
 > > ~~~
 > >{: .output}
 > {: .solution}
 {: .challenge}
 
-In the above example you'll see that the first job submitted was not running due to `(Priority)`.
+In the above example you'll see that the first job submitted was not running due to `Q`.
 This means that the job in in the queue but that it is waiting for other jobs to complete before it can be run.
-The second job, however, is not running due to `(Dependency)`, and this is because it's waiting for the first job to complete.
+The second job, however, is not running due to `H`, and this is because it's on hold waiting for the first job to complete.
 
 Again in the above example, we used the dependency criteria of `afterok`, but many more options are available:
 
@@ -405,7 +424,7 @@ It is possible to list multiple dependencies by appending multiple job ids.
 For example `afterok:123:124:125:153`
 
 In the case of `afterok` if the named job fails, then this job will not be run - it will be deleted from the schedule.
-Simlarly with the `afternotok` - if the named job successed then this job will not be run.
+Similarly with the `afternotok` - if the named job succeeded then this job will not be run.
 
 By using the `afterok` and `afternotok` dependencies it is possible to set up a fork in your workflow, such that when a job fails, a cleanup job will run, but when the job succeeds the next part of your workflow will run.
 
@@ -419,20 +438,20 @@ By using the `afterok` and `afternotok` dependencies it is possible to set up a 
 > 
 > > ## Possible solution
 > > ~~~
-> > > sbatch meeting.sh
-> > Submitted batch job 100
-> > > sbatch -d afterany:100 plan1.sh 
-> > Submitted batch job 101
-> > > sbatch -d afterany:100 plan2.sh 
-> > Submitted batch job 102
-> > > sbatch -d afterany:100 plan3.sh
-> > Submitted batch job 103
-> > > sbatch -d afterany:101,102,103 heist.sh
-> > Submitted batch job 104
-> > > sbatch -d afterok:104 retire.sh
-> > Submitted batch job 105
-> > > sbatch -d afternotok:104 back-stab.sh
-> > Submitted batch job 106
+> > > qsub meeting.sh
+> > 100.gadi-pbs
+> > > qsub -W depend=afterany:100 plan1.sh 
+> > 101.gadi-pbs
+> > > qsub -W depend=afterany:100 plan2.sh 
+> > 102.gadi-pbs
+> > > qsub -W depend=afterany:100 plan3.sh
+> > 103.gadi-pbs
+> > > qsub -W depend=afterany:101,102,103 heist.sh
+> > 104.gadi-pbs
+> > > qsub -W depend=afterok:104 retire.sh
+> > 105.gadi-pbs
+> > > qsub -W depend=afternotok:104 back-stab.sh
+> > 106.gadi-pbs
 > > ~~~
 > > {: .language-bash}
 > {: .solution}
@@ -464,13 +483,16 @@ We could either set up a template system to make a copy of the template job, and
 This brings us to the concept of **array jobs**.
 In an array job we write a single script that is submitted to SLURM, but we tell it that we want multiple copies of this job to run.
 Within the job we then identify the ID or job number, and use that to set up the parameters for the job.
+
+<!-- 
+TODO FROM HERE
 Let's explore this idea with a simple example.
 
 We have a process that does some simulation based on initial parameters and we want to run this on various different inputs and collect the results in a summary file.
 Our workflow is:
 1. set up the parameters for each of the simulations
 2. run the simulation on each set of parameters
-3. colate all the results together in one file
+3. collate all the results together in one file
 
 The simulation that we want to run is computing the area and perimeter of a regular polygon (an N-gon) which is inscribed within the unit circle.
 Our simulation is contained within the following python script:
@@ -695,29 +717,12 @@ We can watch the jobs move through different stages of the queue as follows.
 {: .output}
 
 We now have an understanding of how to run job on and HPC with SLURM, how to create a workflow, and monitor the status of our jobs.
-The we will now focus on doing jobs that are a more than just printing things, and for this we'll need some of our own software.
-
-## Requesting additional resources
-So far we have been specifying (wall) time, tasks/cpus, and RAM required for our jobs, but additional resources are available.
-The two additional resources that we can request on OzSTAR are GPUs and local storage attached to the node.
-On any SLURM system you can run `sbatch --gres=help` to see a list of the resources that can be requested.
-
-### GPU resources
-Accessing GPU resources can be done using the "generic resource request" which is `#PBS --gres=<name>[[:type]:count]`.
-For most systems (including OzSTAR) the gpu resource is just labeled `gpu`.
-Some systems have more than one type of GPU available and so you can specify which GPU you want to access using `--gres=gpu:type:1`.
-The sstar partition has 2 x NVIDIA P100 12GB PCIe GPUs per node, which you'll you can access without having to specify a type.
-Once you have specified the number of GPUs for a job the GPU resources will become visible to any programs which you run from within.
-
-### Attached storage
-Attached storage is typically very fast storage that is physically attached to the compute node making I/O on this device much faster than requesting I/O over the network to another file system.
-To request attached storage you can use `#SBATCH --tmp=20GB`.
-The location of the storage directory will then be saved in the environment variable `$JOBFS`.
+The we will now focus on doing jobs that are a more than just printing things, and for this we'll need some of our own software. -->
 
 ## How do I install software on an HPC
 As noted in a [previous lesson]({{page.root}}{% link _episodes/WhatIsHPC.md %}#software), the HPC facility administrators manage a lot of software.
 For software that is provided by the HPC facility we can use the module system to load the required software/version.
-In the previous exercises you saw this happen when we called `module load python/3.8.5`.
+In the previous exercises you saw this happen when we called `module load python3/3.8.5`.
 We will explore the module system in more detail and then learn how to build and install our own software.
 
 ### The LMOD module system
@@ -814,71 +819,4 @@ Once you locate the module you want to use you'll need to include `module load p
 If you end up in the not so nice situation where you need to run different versions of a program at different parts of your job you can use `module unload pogram/version` or `module swap old_program/version new_program/version` to change versions.
 This is occasionally needed when the software you rely on was not written/built/installed by you.
 
-Installing or building software on an HPC can be a littel trecherous at times because you need to be careful of:
-- where you are building code: the compute nodes might have a different architecture from the head nodes (or each other)
-- the modules loaded whilst building: if you load a library while building the code, you'll need to load that same program/version when running the code so that the library links work properly
-- required permissions: some software requires special permissions to build (or does unexpected things that may be not allowed by your admin)
-- where the software is installed to: most software will want to live in the `/bin` or `/usr/bin` directory of your local machine, but these are not write-able on an HPC. Even if you can install software in your home directory, this is often not the best choice on an HPC.
-
-Building various types of software is not within the scope of this course, however a solution that is becomming more common in HPC facilities is to allow users to build and run containers with their desired software within.
-
-### Containers
-Containers provide a way to package software in an isolated environment which may even have a different operating system from the host.
-The two most popular containerization systems are [Singularity/Apptainer](https://apptainer.org/) and [Docker](https://www.docker.com/).
-Docker is primarily used on computers where you have root access such as your laptop/desktop or a compute node in the cloud.
-HPC facilities will not use Docker as it provides root access to the host system, and instead will use Singularity which does not.
-
-The two systems are largely interpoerable - you can build a Docker container on your desktop, test it out in your workflow, and then convert it to a Singularity image for use on your HPC facility of choice.
-You can think of a container as a self container operating system which you can build with all the software that you need, which you can then deploy on any computer that you like.
-In fact you don't even need to know how to build the containers to use them as there are many available pre-built containers that you can use.
-Both systems provide an online repository for storing built containers: Docker has [DockerHub](https://hub.docker.com/), while Singularity uses [Singularity Container Services (SCS)](https://cloud.sylabs.io/).
-
-For singularity you can pull containers from DockerHub or SCS onto your local machine or HPC.
-For example the software package [AegeanTools](https://github.com/PaulHancock/Aegean), has been containerized and put on DockerHub at [hub.docker.com/r/paulhancock/aegean](https://hub.docker.com/r/paulhancock/aegean).
-To pull the image and run it locally we would do the following:
-
-~~~
-# on OzSTAR the singularity module is called apptainer
-module load apptainer/latest
-
-# pull and convert the container
-# this will create an image file called aegean_main.sif in the current directory
-singularity pull paulhancock/aegean:main
-
-# run the command `aegean` which is provided by the container
-singularity run aegean_main.sif aegean
-~~~
-{: .language-bash}
-
-The invocation syntax is `singularity run <run options> <image name> <command within image>`.
-If we want the program inside the container to interact with files that are outside the container we need to provide a *binding* between the two file systems.
-The syntax for this is `-B <path on host>:<path witin container>`.
-It is usually helpful to bind the current working directory to the same name within the container using `-B $PWD:$PWD`.
-
-If you would normally run `my_prog --args file` in the current directory then you can use a containerized version of `my_prog` and run it using: `singularity run -B $PWD:$PWD my_prog_image.sif my_prog -args $PWD/file`.
-
-On Pawsey we have multiple containers built for the different software pacakages that we run.
-They are stored in a common directory so that everyone in the various MWA user groups can access them (reduce duplication).
-I source the following script `containers.sh` in my job scritps so that I can call a container by putting, e.g.,  `${Crobbie}` at the start of the line.
-~~~
-# containers.sh
-# `source` this file to have short hand access to all your containers
-
-# Location of common container storage
-container_base="/pawsey/mwa/singularity"
-
-# default invocation string
-container_exec="singularity exec -B $PWD"
-
-# need to super-hack the path to make sure that the .h5 beam file is found within the right python path within the container
-Creduce="${container_exec} -B /pawsey/mwa:/usr/lib/python3/dist-packages/mwapy/data ${container_base}/mwa-reduce/mwa-reduce.img"
-# need to pass some environment variables
-Cmanta="${container_exec} --env MWA_ASVO_API_KEY=${MWA_ASVO_API_KEY} ${container_base}/manta-ray-client/manta-ray-client_latest.sif"
-# these work nice as is
-Ccotter="${container_exec} ${container_base}/cotter/cotter_latest.sif"
-Cmwalib="${container_exec} ${container_base}/pymwalib/pymwalib_latest.sif"
-Crobbie="${container_exec} ${container_base}/robbie/robbie-next.sif"
-~~~
-{: .language-bash}
-
-Since Singularity images are single files, you can share them with others in your project group either by copying them or moving them to a shared directory that you use for common containers.
+TODO backlink to containers.
