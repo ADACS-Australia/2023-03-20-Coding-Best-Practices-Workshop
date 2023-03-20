@@ -484,6 +484,8 @@ This brings us to the concept of **array jobs**.
 In an array job we write a single script that is submitted to SLURM, but we tell it that we want multiple copies of this job to run.
 Within the job we then identify the ID or job number, and use that to set up the parameters for the job.
 
+TODO: link / advert the NextFlow workshop!
+
 <!-- 
 TODO FROM HERE
 Let's explore this idea with a simple example.
