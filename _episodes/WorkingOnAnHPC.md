@@ -272,73 +272,82 @@ Lets run a basic hello world script, watch it run, and then pick apart what happ
 > ## The bash script
 > `/scratch/vp91/pjh562/scripts/first_script.sh`
 > ~~~
-> #! /usr/bin/env bash
-> #
-> #SBATCH --job-name=hello
-> #SBATCH --output=res.txt
-> #
-> #SBATCH --ntasks=1
-> #SBATCH --time=05:00
-> #SBATCH --mem-per-cpu=200
-> 
-> # load the python module
-> module load python/3.8.5
-> 
-> # move to the work directory
-> cd /fred/oz983/${USER}
-> # do the work
-> python3 ../KLuken_HPC_workshop/hello.py | tee hello.txt
-> sleep 120
+
 > ~~~
 > {: .language-bash}
 {: .callout}
 
-We then submit the batch script to SLURM using the `sbatch` command from our own directory, and view our job list:
+We then submit the batch script to SLURM using the `qsub` command from our own directory, and view our job list:
 ~~~
-[phancock@farnarkle2 phancock]$ sbatch ../KLuken_HPC_workshop/first_script.sh 
-Submitted batch job 29294385
-[phancock@farnarkle2 phancock]$ squeue -u ${USER}
-             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
-          29294385   skylake    hello phancock PD       0:00      1 (Priority)
+[pjh562@gadi-login-04 pjh562]$ qsub scripts/first_script.sh 
+77477612.gadi-pbs
+[pjh562@gadi-login-04 pjh562]$ qstat -u ${USER}
+
+gadi-pbs: 
+                                                                 Req'd  Req'd   Elap
+Job ID               Username Queue    Jobname    SessID NDS TSK Memory Time  S Time
+-------------------- -------- -------- ---------- ------ --- --- ------ ----- - -----
+77477612.gadi-pbs    pjh562   normal-* hello         --    1   1  200mb 00:05 Q   -- 
 ~~~
 {: .output}
 
-Initially our jobs is not running because it doesn't have high enough priority, but after a minute or so we see:
+Initially our jobs is not running (S column shows Q), but after a minute or so we see:
 
 ~~~
-[phancock@farnarkle2 phancock]$ squeue -u ${USER}
-             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
-          29294385   skylake    hello phancock  R       0:05      1 john3
+[pjh562@gadi-login-04 pjh562]$ qstat  -u ${USER}
+
+gadi-pbs: 
+                                                                 Req'd  Req'd   Elap
+Job ID               Username Queue    Jobname    SessID NDS TSK Memory Time  S Time
+-------------------- -------- -------- ---------- ------ --- --- ------ ----- - -----
+77477612.gadi-pbs    pjh562   normal-* hello      34700*   1   1  200mb 00:05 R 00:00
 ~~~
 {: .output}
 
 The script will take a few seconds to run the python script, and then sleep for 2 minutes so that we have a chance to catch it in the queue.
 
-We'll get the out put ina file called `res.txt`, which sits in the directory from which we submitted the `sbtach` job.
+We'll get the out put ina file called `res.txt`, which sits in the directory from which we submitted the `qsub` job.
 
 ~~~
-[phancock@farnarkle2 phancock]$ more res.txt 
-Hello from the world of john3
+[pjh562@gadi-login-04 pjh562]$ more hello.txt
+Hello from the world of gadi-cpu-clx-1891.gadi.nci.org.au
+
+[pjh562@gadi-login-04 pjh562]$ more output.txt 
+Hello from the world of gadi-cpu-clx-1891.gadi.nci.org.au
+
+======================================================================================
+                  Resource Usage on 2023-03-20 22:53:37:
+   Job Id:             77478053.gadi-pbs
+   Project:            vp91
+   Exit Status:        0
+   Service Units:      0.07
+   NCPUs Requested:    1                      NCPUs Used: 1               
+                                           CPU Time Used: 00:00:00        
+   Memory Requested:   200.0MB               Memory Used: 6.42MB          
+   Walltime requested: 00:05:00            Walltime Used: 00:02:01        
+   JobFS requested:    100.0MB                JobFS used: 0B              
+======================================================================================
+
+[pjh562@gadi-login-04 pjh562]$ more error.txt
 ~~~
 {: .output}
 
 Now let's review what we did:
 1. Created a python script which did all the "hard" work.
-2. Created a bash script which told SLURM about the resources that we needed, and how to invoke our program.
-   1. The `##SBATCH` comments at the top of the bash script are ignored by bash, but are picked up by SLURM.
-      1. `--job-name` is what shows up in the `squeue` listing. It defaults to your script name, but can be renamed here.
-      2. `--output` is the location of the file that will contain all of the `STDOUT` from the running of your program
-      3. `--error` (not used above) is the location of the file that will have the `STDERR` from your program
-      4. `--ntasks` tells SLURM how many tasks you'll be running at once
-      5. `--time` is the (wall) time that this job requires. If your job does not complete in this time it will be killed.
-      6. `--mem-per-cpu` will tell SLURM how much ram is required per cpu (can also use just `--mem`) default is in MB, but you can use gb
+2. Created a bash script which told PBSPro about the resources that we needed, and how to invoke our program.
+   1. The `#PBS` comments at the top of the bash script are ignored by bash, but are picked up by PBSPro.
+      1. `-N` is what shows up in the `qsub` listing. It defaults to your script name, but can be renamed here.
+      2. `-o` is the location of the file that will contain all of the `STDOUT` from the running of your program, plus a summary of resource usage at the end.
+      3. `-e`  is the location of the file that will have the `STDERR` from your program
+      4. `-l walltime=[H:M:S]` is the (wall) time that this job requires. If your job does not complete in this time it will be killed.
+      5. `-l mem=` will tell PBSpro how much ram is required per node default is in B, but you can use MB/GB
    2. Load the software that we'll need using the `module` system
    3. Move to the directory which contains the code we are running
    4. Run the python code and copy the stdout to a file
    5. Sleep for 120 to simulate a job that takes more than a few seconds to run
-3. Submitted the job to the scheduler using `sbatch`
-4. Watched the progress of the job by running `squeue -u ${USER}` (a few times)
-5. Inspected the ouput once the job completed by viewin `res.txt`.
+3. Submitted the job to the scheduler using `qsub`
+4. Watched the progress of the job by running `qstat -u ${USER}` (a few times)
+5. Inspected the outputs once the job completed by viewing `hello.txt`, `output.txt`, and `error.txt` (empty).
 
 ## Building a workflow
 Once we know how to submit jobs we start thinking about all the jobs that we could run, and quickly we get into a state where we spend all our time writing jobs, submitting them to the queue, monitoring them, and then deciding which jobs need to be done next and submitting them.
@@ -510,13 +519,13 @@ Our setup script is:
 > ~~~
 > #! /usr/bin/env bash
 > #
-> #SBATCH --job-name=start
-> #SBATCH --output=/fred/oz983/%u/start_%A_out.txt
-> #SBATCH --error=/fred/oz983/%u/start_%A_err.txt
+> #PBS --job-name=start
+> #PBS --output=/fred/oz983/%u/start_%A_out.txt
+> #PBS --error=/fred/oz983/%u/start_%A_err.txt
 > #
-> #SBATCH --ntasks=1
-> #SBATCH --time=00:05:00
-> #SBATCH --mem-per-cpu=1G
+> #PBS --ntasks=1
+> #PBS --time=00:05:00
+> #PBS --mem-per-cpu=1G
 > 
 > # move to the directory where the script/data are
 > cd /fred/oz983/${USER}
@@ -551,14 +560,14 @@ We use `--array=start-end` to indicate that this is an array job and what job in
 > ~~~
 > #! /usr/bin/env bash
 > #
-> #SBATCH --job-name=ngon
-> #SBATCH --output=/fred/oz983/%u/ngon_%A-%a_out.txt
-> #SBATCH --error=/fred/oz983/%u/ngon_%A-%a_err.txt
+> #PBS --job-name=ngon
+> #PBS --output=/fred/oz983/%u/ngon_%A-%a_out.txt
+> #PBS --error=/fred/oz983/%u/ngon_%A-%a_err.txt
 > #
-> #SBATCH --ntasks=1
-> #SBATCH --time=00:05:00
-> #SBATCH --mem-per-cpu=1G
-> #SBATCH --array=1-6
+> #PBS --ntasks=1
+> #PBS --time=00:05:00
+> #PBS --mem-per-cpu=1G
+> #PBS --array=1-6
 > 
 > # load modules
 > module load python/3.8.5
@@ -593,13 +602,13 @@ Finally our collect and clean up script looks like:
 > ~~~
 > #! /usr/bin/env bash
 > #
-> #SBATCH --job-name=collect
-> #SBATCH --output=/fred/oz983/%u/collect_%A_out.txt
-> #SBATCH --error=/fred/oz983/%u/collect_%A_err.txt
+> #PBS --job-name=collect
+> #PBS --output=/fred/oz983/%u/collect_%A_out.txt
+> #PBS --error=/fred/oz983/%u/collect_%A_err.txt
 > #
-> #SBATCH --ntasks=1
-> #SBATCH --time=00:05
-> #SBATCH --mem-per-cpu=200
+> #PBS --ntasks=1
+> #PBS --time=00:05
+> #PBS --mem-per-cpu=200
 > 
 > 
 > # move to the directory where the script/data are
@@ -694,7 +703,7 @@ The two additional resources that we can request on OzSTAR are GPUs and local st
 On any SLURM system you can run `sbatch --gres=help` to see a list of the resources that can be requested.
 
 ### GPU resources
-Accessing GPU resources can be done using the "generic resource request" which is `#SBATCH --gres=<name>[[:type]:count]`.
+Accessing GPU resources can be done using the "generic resource request" which is `#PBS --gres=<name>[[:type]:count]`.
 For most systems (including OzSTAR) the gpu resource is just labeled `gpu`.
 Some systems have more than one type of GPU available and so you can specify which GPU you want to access using `--gres=gpu:type:1`.
 The sstar partition has 2 x NVIDIA P100 12GB PCIe GPUs per node, which you'll you can access without having to specify a type.
