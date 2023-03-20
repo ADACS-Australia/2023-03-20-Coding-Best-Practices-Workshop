@@ -447,8 +447,8 @@ This means that you can create docker images on your local machine, test and dev
 > > {: .output}
 > > Note the name of the image will be `test_latest-2022-10-17-806deabcb504.simg` which you can rename.
 > > ~~~
+> > sudo chown ${USER} -R test
 > > mv test/[long name].simg test.sif
-> > sudo chown ${USER} test.sif
 > > ~~~
 > > {: .language-bash}
 > {: .solution}
@@ -472,35 +472,37 @@ Where `[run options]` are options for singularity run command, and `[args]` are 
 Singularity supports binding files/directories within the container to locations on the host machine, using the `--bind` or `-B` flag.
 
 Singularity offers multiple ways to interact with a container:
-- run - launch container an run a predefined script (eg `runme`)
+- run - launch container an run a predefined script
 - exec - launch container with custom commands (eg `sky_sim.py` or `python my_other_script.py`)
 - shell - drops you into an interactive shell within the container (similar to exec with `/usr/bin/bash` as args)
 
 > ## Run your singularity image
-> If you have built a `test.sif` image, attempt the following:
-> 1. Copy your `test.sif` file to your HPC of choice.
+> 1. If you have built a `test.sif` image, copy your `test.sif` file to `gadi-dm.nci.org.au:/scratch/vp91/${USER}/.` (Else, you should copy my pre-made file from `/scratch/vp91/pjh562`).
 > 2. Login to NCI
 > 3. Use `module load` to load `singularity/apptainer`
 > 4. Try the singularity run/exec/shell commands on your container
 >
+> 
 > Reach out via the [etherpad]({{site.ether_pad}}) or raise your hand if you have questions or get stuck.
 > > ## Example
 > > ~~~
-> > scp test.sif nci:/scratch/vp91/pjh562/.
-> > ssh nci
+> > scp test.sif gadi-dm.nci.org.au:/scratch/vp91/pjh562/.
+> > ssh gadi
 > > module load singularity
-> > singularity run test.sif
+> > singularity exec test.sif sky_sim.py
 > > ~~~
 > > {: .language-bash}
 > > ~~~
-> > Hello from `mymodule`
-> > (14.215420962967535, 41.26916666666666)
-> > ['/usr/local/bin/runme']
+> > Wrote catalog.csv
 > > ~~~
 > > {: .output}
+> > If we run `ls` then you'll see the catalog.csv file in the local directory.
+> > This is because NCI have set up an automatic binding of the local directory to the working directory within singularity.
+> > Thanks NCI!
+> >
+> > If this wasn't the case we could create the binding like this.
 > > ~~~
 > > singularity cmd -B $PWD:/app test.sif sky_sim.py
-> > more catalog.csv
 > > ~~~
 > > {: .language-bash}
 > > 
@@ -515,4 +517,3 @@ Singularity offers multiple ways to interact with a container:
 > > {: .output}
 > {: .solution}
 {: .challenge}
-
