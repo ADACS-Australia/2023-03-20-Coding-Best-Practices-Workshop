@@ -8,6 +8,3 @@ RUN cd /tmp &&\
 
 # set the default work directory
 WORKDIR /app
-
-# set the cmd (default program to run)
-CMD ["runme"]

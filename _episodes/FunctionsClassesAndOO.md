@@ -1,13 +1,18 @@
 ---
 title: "Functions, Classes, and OO (Oh My!)"
 teaching: 15
-exercises: 15
+exercises: 0
 questions:
-- "TODO"
+- "What is this 'object oriented' thing people talk about?"
+- "When should I write or use classes?"
+- "Should I feel bad about not writing classes?"
 objectives:
-- "TODO"
+- "Understand object oriented programming"
+- "Be able to *use* classes"
+- "Not feel bad for not writing classes"
 keypoints:
-- "TODO"
+- "You don't have to create your own classes if you don't want to"
+- "Classes can be useful but they are not essential"
 ---
 
 ## Object Oriented (OO) programming
@@ -33,6 +38,7 @@ We have already created some of our own functions earlier in this workshop.
 Python allows us to work in an OO paradigm, but also in a functional or programmatic paradigm.
 (In fact we are able to use a hybrid as well).
 Note that PEP8 doesn't make any recommendation about which of these paradigms should be used!
+(None of the PEP documents do to my knowledge).
 
 Some people may feel that they are not "real programmers" because they don't use objects.
 This is false for two reasons:

@@ -285,15 +285,25 @@ $ docker build -t robbie:new .
 Where we used `robbie` as the container name and `new` as the tag.
 Typically people use either a version number (eg, v1.0) or `latest` as the tag, but any string will be accepted.
 
-TODO: link to docker playground thingo
+If you have docker installed on your computer you can run the following exercise there.
+If you don't have docker then you can run docker using [play with docker](https://labs.play-with-docker.com/) (free registration required).
+
+> ## Using play-with-docker
+> - Sign in to [play with docker](https://labs.play-with-docker.com/)
+> - Click on the "Add new instance link"
+> ![PWD add new instance]({{page.root}}{% link fig/PWDAddInstance.png %})
+> - Use the `vim` editor to create a file called `Dockerfile`
+> - Follow the instructions below
+>
+{: .solution}
+
 
 >## Let's build a container
 > Create a `Dockerfile` which will generate a container with this recipe:
 > - use python:3.8.5 as the base layer
-> - git clone **my** repository for this workshop (use https address to avoid ssh failures)
+> - git clone [**my** repository](https://github.com/PaulHancock/symmetrical-octo-parakeet.git) for this workshop (we use https address to avoid ssh failures)
 > - install `mymodule` with pip
 > - set the default `WORKDIR` to be `/app`
-> - set the default command (`CMD`) to be `runme`
 >
 > Share your tips and pitfalls in the [etherpad]({{site.ether_pad}}).
 > > ## Solution
@@ -309,8 +319,6 @@ TODO: link to docker playground thingo
 > > # set the default work directory
 > > WORKDIR /app
 > >
-> > # set the cmd (default program to run)
-> > CMD ["runme"]
 > > ~~~
 > > {: .language-docker}
 > {: .solution}
@@ -324,11 +332,6 @@ TODO: link to docker playground thingo
 > {: .language-bash}
 > Run it like this:
 > ~~~
-> $ docker run test
-> ~~~
-> {: .language-bash}
-> You can provide alternative commands by adding arguments:
-> ~~~
 > $ docker run test sky_sim.py
 > ~~~
 > {: .language-bash}
@@ -338,7 +341,7 @@ TODO: link to docker playground thingo
 > The `sky_sim.py` script prints to STDOUT when run, but will also save the output to a file called `catalog.csv`
 > To access this file we need to bind our local directory to the working directory (`/app`) within the container.
 >
-> Run the container with the appropriate binding and view the output file.
+> Run `sky_sim.py` from within the `test` container using the appropriate binding and view the output file.
 >
 > Share your results in the [etherpad]({{site.ether_pad}}).
 > > ## Solution
@@ -373,6 +376,17 @@ container='docker run --mount type=bind,source="$(pwd)",target=/app test'
 ${container} sky_sim.py
 ~~~
 {: .language-bash}
+
+Or you might create a bash alias for general use on your command line:
+~~~
+alias container='docker run --mount type=bind,source="$(pwd)",target=/app test'
+~~~
+{: .language-bash}
+
+So now we know how to make and run a Docker container.
+This will work fine on your local computer, but not on an HPC.
+HPC systems will not (should not) give you root access to anything, which means you can't use Docker (it requires root access).
+Instead you'll use singularity/apptainer instead.
 
 
 ## Making a singularity image
@@ -439,6 +453,13 @@ This means that you can create docker images on your local machine, test and dev
 > > {: .language-bash}
 > {: .solution}
 {: .challenge}
+
+> ## play-with-docker note
+> If you see this image:
+> ![PWD derps]({{page.root}}{% link fig/PWDDerp.png %})
+> This is normal. I can't figure out how to make singularity containers on play with docker without breaking some internal file system limit.
+> 
+{: .callout}
 
 ## Running singularity containers
 Running a singularity container is much like running a docker container, however instead of using the image `name:tag`, you can link directly to the image file.

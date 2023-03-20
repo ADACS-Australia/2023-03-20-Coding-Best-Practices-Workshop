@@ -3,11 +3,16 @@ title: "Interactive Development Environments"
 teaching: 15
 exercises: 15
 questions:
-- "TODO"
+- "What is and IDE?"
+- "What is **The best** IDE?"
+- "What have IDEs ever done for us?"
 objectives:
-- "TODO"
+- "Review how we edit our code"
+- "Preview some of the nice features of VSCode"
 keypoints:
-- "TODO"
+- "VSCode is amazing"
+- "Many IDEs learn from each other so at some level they are mostly the same"
+- "Use what you like best and what is supported locally"
 ---
 
 ## Your personal work environment
