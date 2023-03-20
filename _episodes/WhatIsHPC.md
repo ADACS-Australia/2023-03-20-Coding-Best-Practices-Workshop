@@ -131,7 +131,7 @@ Some HPC facilities partition their hardware into clusters depending on the user
 These clusters are groups of computing nodes which have a high amount of connectivity within a cluster, but are not well connected with other clusters.
 They different clusters act as different HPC systems, except for the fact that they may be connected to the same storage systems.
 
-The cluster that we'll be using for this workshop is called Gadi ("gar-dee" meaning *to search for*`* in the language of the Ngunnawal people), and is physically located at the NCI on the ANU's Acton campus.
+The cluster that we'll be using for this workshop is called Gadi ("gar-dee" meaning *to search for* in the language of the Ngunnawal people), and is physically located at the NCI on the ANU's Acton campus.
 
 ![Gadi cluster]({{page.root}}{% link fig/NCIGadi.png %})
 
