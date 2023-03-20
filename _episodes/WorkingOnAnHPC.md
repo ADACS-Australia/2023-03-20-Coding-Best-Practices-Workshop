@@ -89,6 +89,7 @@ It is *not* backed up, files older than 10days are marked for deletion.
 > > ## Solution
 > > ~~~
 > > cd /scratch/vp91
+> > ls
 > > mkdir ${USER}
 > > ~~~
 > > {: .language-bash}
@@ -222,6 +223,8 @@ You will most likely get a different node name.
 
 When you finish with an interactive session you can exit it using `exit` or `<ctrl>+d` to end the ssh session, and then again to exit the job allocation.
 
+Before we exit the interactive session, let's have a look at what the job queue looks like.
+
 ~~~
 [pjh562@gadi-cpu-clx-1891 ~]$ qstat -u ${USER} 
 
@@ -238,6 +241,11 @@ qsub: job 76970825.gadi-pbs completed
 ~~~
 {: .output}
 
+You can see that each job has an ID (above it is 76970825), and we can see which queue the job is in, how many nodes (NDS) and tasks (TSK) have been assigned, and what the requested memory/time is, as well as how long the job has been running (Elap Time).
+We didn't request a specific amount of nodes/tasks/memory so we get the default.
+
+If we have no jobs in the queue then `qstat` will just return nothing.
+
 Interactive jobs are good for debugging your code, but usually leave the compute node idle whilst you read/think/code.
 Interactive jobs should be used sparingly, in preference of batch jobs.
 
@@ -249,7 +257,7 @@ With these bits of information the SLURM scheduler can then appropriately assign
 Lets run a basic hello world script, watch it run, and then pick apart what happened.
 
 > ## The python script
-> `/fred/oz983/KLuken_HPC_workshop/hello.py`
+> `/scratch/vp91/pjh562/scripts/hello.py`
 > ~~~
 > #! /usr/bin/env python
 > 
@@ -262,7 +270,7 @@ Lets run a basic hello world script, watch it run, and then pick apart what happ
 {: .callout}
 
 > ## The bash script
-> `/fred/oz983/KLuken_HPC_workshop/first_script.sh`
+> `/scratch/vp91/pjh562/scripts/first_script.sh`
 > ~~~
 > #! /usr/bin/env bash
 > #

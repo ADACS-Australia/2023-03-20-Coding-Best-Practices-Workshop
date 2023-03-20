@@ -323,8 +323,8 @@ Similarly, because we provided `scripts=['scripts/runme']`, we should have acces
 Try it out!
 
 > ## Installing directly from github
-> If you have the right structure in your repository on github, then pip can install directly from github using the follwing:
-> `pip install pip install git+https://github.com/[user]/[repo].git`
+> If you have the right structure in your repository on github, then pip can install directly from github using the following:
+> `pip install git+https://github.com/[user]/[repo].git`
 >
 > You can even select a branch by appending `@branchname` to the github link!
 > 
@@ -369,9 +369,9 @@ For example our project readme might look like this:
 > ## Create a README.md for your project
 > Based on the above recommendations, write a short readme for this example project
 > 
-> commit/push this to Github and see how it renders the information
->
-> Repeat until you are happy with the result.
+> Commit/push this to Github and see how it renders the information.
+> If you are not happy with the results, you can edit them on GitHub, it has a nice 'preview' feature that will reduce the number of commits that you'll generate.
+> Remember to pull these to your local repo to keep them in sync.
 {: .challenge}
 
 ## Useful project metadata

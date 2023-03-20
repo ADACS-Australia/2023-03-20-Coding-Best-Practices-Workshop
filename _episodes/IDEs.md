@@ -19,7 +19,7 @@ keypoints:
 Having the right number and right type of screens can really boost your productivity.
 So can a comfortable keyboard and mouse, a good chair, and even some great "in the zone" music over a good set of headphones.
 You'll also find a great productivity boost by using a text editor that does more than just read/write files for you.
-Vim and emacs are great, and do have some great plugins and features that help you with your coding experience, but a a purpose build interactive development environment is hard to beat.
+Vim and emacs are great, and do have some great plugins and features that help you with your coding experience, but a purpose build interactive development environment is hard to beat.
 
 In this episode will be demonstrating some of the great features of [VSCode](https://code.visualstudio.com/).
 Not because we are shills for microsoft, but because VSCode is genuinely excellent and is the tool of choice in our office.
@@ -27,7 +27,7 @@ Not because we are shills for microsoft, but because VSCode is genuinely excelle
 Other notable products which provide many/all the features of VSCode include:
 - [Pycharm](https://www.jetbrains.com/pycharm/) (and the rest of the JetBrains suite TBH)
 - [kate](https://kate-editor.org/)
-- [ecplise](https://www.eclipse.org/downloads/) (mostly Java focused)
+- [eclipse](https://www.eclipse.org/downloads/) (mostly Java focused)
 - [atom](https://github.com/atom) (precursor to VSCode, now sunset)
 - [sublime text](https://www.sublimetext.com/)
 - [code::blocks](http://www.codeblocks.org/)
@@ -105,7 +105,6 @@ Or using [remote tunnels](https://code.visualstudio.com/docs/remote/tunnels) ins
 > > ![mega brain](http://www.reactiongifs.com/r/yjbmm.gif)
 > {: .solution}
 {: .challenge}
-
 
 
 ## Summary

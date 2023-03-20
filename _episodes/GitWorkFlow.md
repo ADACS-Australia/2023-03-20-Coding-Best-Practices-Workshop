@@ -65,6 +65,6 @@ The idea is that developer A will make a bunch of changes in their feature branc
 Good practice is to then have a different developer act as a reviewer for these changes.
 Developer B will look at what the feature branch is trying to address, what has changed, and check that tests are still passing, new tests have been created, and documentation has been created/updated.
 Once the reviewer is happy they approve the PR and the feature branch is merged.
-For solo developers the PR is not always required, but is still sometimes used as it can cause automated testing to be run (see CI/CD later).
+For solo developers the PR is not always required, but is still sometimes used as it can cause automated testing to be run.
 Even in small teams, it can be very beneficial to require all changes to the main branch to be done via pull requests from a feature branch, with some code review and discussion before the PR is accepted.
 Again, Atlassian have a [more detailed description](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow) of the feature branching workflow.
