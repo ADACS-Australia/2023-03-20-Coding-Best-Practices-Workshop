@@ -15,44 +15,43 @@ keypoints:
 - "Know when to stop"
 ---
 
-Optimize your total workflow:
 
-Amdahl's Law: 
+## Scope your optimization work
+When we are engaged in optimization there are a few things we should do first:
+- Understand what the problem is
+- Measure the current state of things (benchmark + first profile)
+- Have a target in mind for what is "good enough"
+
+When thinking about the problem, remember that your code doesn't run in isolation.
+It runs as part of a larger workflow, that includes other pieces of code as well as non-automated things like researcher thinking time.
+Consider your entire workflow, and how much time is spent on waiting for code to run vs you analyzing results.
+If you have other useful work that can be done while your code runs, then do that, it'll be time well spent.
+
+**Amdahl's Law**: 
 - System speed-up limited by the slowest component.
 
-Paul’s rule of thumb: 
+**Paul’s rule of thumb**: 
 - You are the slowest component.
 
-Therefore: 
+**Therefore**: 
 1. Focus on reducing **your** active interaction time,
 2. *then* on your total wait time, 
 3. *then* on cpu time.
 
-Avoid premature optimization:
+In [parallel computing]({{page.root}}{% link _episodes/ParallelComputing.md %}) we'll explore ways of making your work complete sooner, without making it run faster!
+Another way of making your code run faster can be to just buy a faster computer, though this isn't always an option for everyone).
+
+A reason to confirm that we *need* to optimize our code is that we want to avoid premature optimization:
 ![ObligatoryXKCD](https://imgs.xkcd.com/comics/is_it_worth_the_time.png)
 
-Verify that you **have** a problem before you spend resources **fixing** a problem.
-
-
-> Premature optimization is the root of all evil
-> 
-> -- Donanld Knuth (in the context of software development)
-{: .quote}
 
 Good coding practices can lead to more performant code from the outset.
 This is **not** wasted time.
 
-You can't optimize to zero.
-Working fast is good, but avoiding work is better.
-Repeated computing is wasted computing.
-[Check-pointing](https://hpc-unibe-ch.github.io/slurm/checkpointing.html) and [memoization](https://en.wikipedia.org/wiki/Memoization) are good for this.
-
-Embrace sticky tape solutions:
-- Build on existing solutions
-- Use your code to move between solutions (eg BASH / Python)
-- Only write new code where none exists
-- Choose a language/framework that suits the problem
-- Optimize only when there is a problem 
+Remember also that you cannot can't optimize to zero.
+There will always be a minimum amount of time that your work will take to do, and you will only ever approach this minimum asymptotically.
+At first you'll get 2-3 or even 10x speed increases for moderate effort, but as you keep going, you'll end up spending a day writing unreadable code just for that 0.1% gain.
+Don't be a speed addict, know when to quit!
 
 
 ## leveraging the work of others
