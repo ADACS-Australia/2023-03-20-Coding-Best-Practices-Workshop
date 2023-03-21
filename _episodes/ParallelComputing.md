@@ -1,7 +1,7 @@
 ---
 title: "Parallel Computing"
-teaching: 15
-exercises: 15
+teaching: 40
+exercises: 40
 questions:
 - "What is parallel computing?"
 - "How can I do parallel computing?"
@@ -40,11 +40,9 @@ Depending on how the software is implemented there are two main ways to run task
 1. Run one task per compute node, with many nodes being use at once. This would typically mean running an array job.
 2. Run one task per CPU within a single compute node, with just one node being used at a time. This would be facilitated with a single job script.
 
-TODO OzStar -> NCI
-
 We can of course run hybrid models which combine the two above extremes.
 Suppose we have 1000 tasks that need to be done, and each task can be completed using a single CPU core in 6hours.
-Suppose we want to run this on Gadi, such that we have 107 compute nodes, each with 48 CPU cores .
+Suppose we want to run this on gadi, such that we have 107 compute nodes, each with 48 CPU cores .
 We could use (1) above, but it would required 1,000 nodes x 6 hours of resources (6,000 node hours), and only use 1/48th of the available cores available on each node.
 This is not a good use of resources.
 We can't use (2) above because our nodes don't have 1000 cores in any single node.
@@ -242,12 +240,6 @@ Some potentially useful places to start are:
 -  [scikit-learn](https://scikit-learn.org/stable/)
 -  [scikit-image](https://scikit-image.org/)
 
-> ## Share you favorite libraries
-> Share your favorite libraries with your group and in the [etherpad]({{site.ether_pad}}).
-> 
-> Don't restrict yourself to Python!
-{: .challenge}
-
 
 ### Domain or Data based parallelism
 Consider an task that reads a data array, transforms it, and then writes it out again.
@@ -317,11 +309,6 @@ To avoid creating/releasing locks thousands of times, it would instead be useful
 
 The [OpenMP](https://www.openmp.org/) library is the most widely used for providing shared memory access to C and Fortran programs.
 Other languages (such as python) which provide shared memory libraries are either built on OpenMP or at least use the same programming paradigm and will therefore use similar terminology, and have similar limitations to OpenMP.
-
-
-<!-- Be aware that SLURM needs to know how many CPU cores to allocate to your job.
-If you ask for `--ntasks=1` then you'll typically get just a single core.
-Use `--ntasks=N` or `--cpu-per-task=N` to have access to more cores. -->
 
 In Python there are two ways to achieve parallel computing: multiprocessing, and MPI4py.
 
@@ -424,6 +411,16 @@ Here is an implementation of our `sky_sim.py` code using multiprocessing.
 > {: .language-python}
 {: .solution}
 
+> # Make a branch
+> Let's make a new branch for each of our parallel implementations.
+>
+> For multiprocessing lets make a branch called `multiprocessing`:
+> ~~~
+> git branch multiprocessing
+> ~~~
+> {: .bash}
+>
+{: .challenge}
 
 There are two main things that we need to do differently in this version of the code compared to our original implementation.
 Firstly note that the code is largely unchanged, except for the introduction of a new function called `make_stars_parallel`, and that we have changed the call signature of the original function to just accept `args` instead of `ra, dec, nsrc`.
@@ -720,6 +717,18 @@ Let's look at how we can do that in another example.
 > {: .language-python}
 {: .solution}
 
+> # Make another branch
+> For this version of the code lets make a branch called `mp-sharemem`:
+> ~~~
+> git branch mp-sharemem
+> ~~~
+> {: .bash}
+>
+> Note that we are now branching a branch.
+> `mp-sharemem` is branched from `multiprocessing` which is branched from `main`!
+>
+{: .challenge}
+
 A quick summary of what is different this time (compared to our serial version):
 - we define a global variable (`mem_id`) which will indicate the shared memory location
 - we have modified `make_stars` to have an altered call signature (as before)
@@ -966,11 +975,31 @@ Continuing our `sky_sim` example we can use MPI to acheive our simulation task.
 > {: .language-python}
 {: .solution}
 
+> # Make yet another branch
+> Since our MPI implementation isn't related to the multiprocessing ones, we'll make a new branch but this time branch off main.
+> ~~~
+> git checkout main
+> git branch mpi
+> ~~~
+> {: .bash}
+>
+{: .challenge}
+
 To run the above code we use a syntx similar to xargs:
 ~~~
 mpirun -n 4 python3 sky_sim_mpi.py
 ~~~
 {: .language-bash}
+
+> # mpirun not working?
+> You'll nee to have an mpi library installed.
+> On ubuntu you can use mpich which is installed as:
+> `sudo apt install mpich`
+>
+> If your local machine doesn't have mpi you can install it, but sometimes it can be rather tricky. 
+> Instead you might just log into gadi and run your work there.
+> `module load openmpi`
+{: .callout}
 
 Whilst we can use our COMM_WORLD to pass messages between processes, it's a very ineffective way to pass large quantities of data (see previous chat about serialization).
 One way to get around this issue is to have each process dump their work products in a shared directory and then have another program join all the work together.
@@ -1078,3 +1107,11 @@ In such a scheme a program will use MPI to dispatch a bunch of primary processes
 There are many levels of parallelism that can be leveraged for faster throughput.
 The type of parallelism used will depend on the details of the job at hand or the amount of time that you are able and willing to invest.
 Starting with the easy parts first (eg job arrays and job packing with `xargs`) and then moving to shared memory or MPI jobs until you reach a desired level of performance is recommended.
+
+> # Push your work to github
+> For each of the branches that you have created:
+> - `git checkout [branch]`
+> - `git push`
+>
+> Then go onto github and view the different branches.
+{: .challenge}

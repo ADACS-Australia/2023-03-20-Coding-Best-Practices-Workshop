@@ -113,7 +113,7 @@ This way you can keep the test code, but it just wont run.
 
 ### More detailed testing
 Let's now work with some more meaningful tests for the `sky_sim.py` that we have been working with.
-In particular let's test the `get_radec()` and `make_positions()` functions.
+In particular let's test the `get_radec()` and `make_stars()` functions.
 
 To do this we nee to know how to work with exceptions.
 In python we can use the keyword `raise` to send an exception up the call stack where it will eventually be caught in a `try/except` clause (or by the python interpreter itself).
@@ -172,12 +172,12 @@ We can have multiple exit points in our function, corresponding to the various w
 > 
 {: .challenge}
 
-> ## testing make_positions()
-> Read the docstring for the make_positions function below and come up with at least 2 tests that you can run.
+> ## testing make_stars()
+> Read the docstring for the make_stars function below and come up with at least 2 tests that you can run.
 > 
 > > ## initial function
 > > ~~~
-> > def make_positions(ra, dec, nsrc=NSRC):
+> > def make_stars(ra, dec, nsrc=NSRC):
 > >     """
 > >     Generate NSRC stars within 1 degree of the given ra/dec
 > > 
