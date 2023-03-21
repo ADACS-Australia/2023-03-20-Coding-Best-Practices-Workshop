@@ -200,6 +200,90 @@ The **run** column shows how many jobs are currently running in that queue and t
 Together we can use these get a feel for which queues are busy/free.
 
 
+## How do I install software on an HPC
+As noted in a [previous lesson]({{page.root}}{% link _episodes/WhatIsHPC.md %}#software), the HPC facility administrators manage a lot of software.
+For software that is provided by the HPC facility we can use the module system to load the required software/version.
+In the previous exercises you saw this happen when we called `module load python3/3.8.5`.
+We will explore the module system in more detail and then learn how to build and install our own software.
+
+### The LMOD module system
+The [LMOD](https://lmod.readthedocs.io/en/latest/) software is designed to allow users of an HPC facility to manage which software they are using at a given time.
+When a user loads a module, the LMOD system will set a bunch of different environment variables that are needed to run the particular software.
+Additionally, additional modules (dependencies) will be loaded (or unloaded) to minimize version conflicts.
+
+When we first log into gadi we have a fairly limited set of modules already loaded:
+~~~
+module[pjh562@gadi-login-02 ~]$ module list
+Currently Loaded Modulefiles:
+ 1) pbs  
+~~~
+{: .output}
+
+If we want to have access to a python interpreter we can try the following:
+~~~
+[pjh562@gadi-login-02 ~]$ module load python
+ERROR: Unable to locate a modulefile for 'python'
+~~~
+{: .output}
+
+Seems like there is no python module!
+Well actually, there are a lot installed, and LMOD needs more info to know which one we want.
+We can show all the available modules using `module avail` (warning it's a LOT).
+If we want to look for python modules we can do the following:
+
+~~~
+[pjh562@gadi-login-02 ~]$ module avail python
+-------------------------------------------- /apps/Modules/modulefiles --------------------------------------------
+python2-as-python  python2/2.7.17     python3/3.7.4  python3/3.9.2   python3/3.10.4  
+python2/2.7.16     python3-as-python  python3/3.8.5  python3/3.10.0  python3/3.11.0  
+~~~
+{: .output}
+
+We'll choose v3.8 of python which we load via `module load python3/3.8.5`.
+Let's do that now.
+
+~~~
+[pjh562@gadi-login-02 ~]$ module load python3/3.8.5
+Loading python3/3.8.5
+  Loading requirement: intel-mkl/2020.2.254
+[pjh562@gadi-login-02 ~]$ module list
+Currently Loaded Modulefiles:
+ 1) pbs   2) intel-mkl/2020.2.254   3) python3/3.8.5  
+~~~
+{: .output}
+
+Note that LMOD also loaded the `intel-mkl` library as well. 
+
+> ## Why `intel-mkl`?
+> Because the LMOD `python3/3.8.5` includes a bunch of python libraries such as `numpy`.
+> `numpy` has been installed using the [intel math kernel library](http://en.wikipedia.org/wiki/Math_Kernel_Library), which make math fast!
+> 
+{: .callout}
+
+> ## Find some modules
+> Use `module avail` to figure out what versions of the `openmpi` library are available.
+> > ## answer
+> > ~~~
+> > [pjh562@gadi-login-02 ~]$ module avail openmpi
+> > -------------------------------------------- /apps/Modules/modulefiles --------------------------------------------
+> > openmpi/2.1.6           openmpi/3.1.4-debug  openmpi/4.0.4        openmpi/4.0.7-debug  openmpi/4.1.3           
+> > openmpi/2.1.6-debug     openmpi/4.0.1        openmpi/4.0.4-debug  openmpi/4.1.0        openmpi/4.1.3-debug     
+> > openmpi/2.1.6-mt        openmpi/4.0.1-debug  openmpi/4.0.5        openmpi/4.1.0-debug  openmpi/4.1.4(default)  
+> > openmpi/2.1.6-mt-debug  openmpi/4.0.2        openmpi/4.0.5-debug  openmpi/4.1.1        openmpi/4.1.4-debug     
+> > openmpi/3.0.4           openmpi/4.0.2-debug  openmpi/4.0.6        openmpi/4.1.1-debug  
+> > openmpi/3.0.4-debug     openmpi/4.0.3        openmpi/4.0.6-debug  openmpi/4.1.2        
+> > openmpi/3.1.4           openmpi/4.0.3-debug  openmpi/4.0.7        openmpi/4.1.2-debug  
+> > ~~~
+> > {: .output}
+> {: .solution}
+{: .challenge}
+
+The `module avail` command will match partial strings such as `module avail *debug*`.
+Once you locate the module you want to use you'll need to include `module load program/version` in all of your job scripts before that program can be used.
+If you end up in the not so nice situation where you need to run different versions of a program at different parts of your job you can use `module unload pogram/version` or `module swap old_program/version new_program/version` to change versions.
+This is occasionally needed when the software you rely on was not written/built/installed by you.
+
+[Containers]({{page.root}}{% link _episodes/Containers.md %}) are a good way to get around messing about with program versions.
 
 ## Running Jobs
 There are two types of jobs that can be run: either a batch job where PBSPro executes a script on your behalf, or an interactive job whereby you are given direct access to a compute node and you can do things interactively.
@@ -282,7 +366,7 @@ Lets run a basic hello world script, watch it run, and then pick apart what happ
 > #PBS -l mem=200MB
 > 
 > # load the python module
-> module load python/3.8.5
+> module load python3/3.8.5
 > 
 > # move to the work directory
 > cd /scratch/vp91/${USER}
@@ -457,368 +541,33 @@ By using the `afterok` and `afternotok` dependencies it is possible to set up a 
 > {: .solution}
 {: .challenge}
 
-### Parallel workflows
-We will be discussing parallel computing in [another lesson]({{page.root}}{% link _episodes/ParallelComputing.md %}) in more depth.
-As a prelude to that lesson lets consider a workflow which has a structure more like the following:
-
-![DiamondWorkflow]({{page.root}}{% link fig/DiamondWorkflow.png %})
-
-In this workflow we have a single job which fetches all the data that we need to process, and then multiple processing jobs which are independent of each other, followed by a cleanup job.
-The dependency indicated by the arrows shows that the different processing jobs need to happen after the data retrieval and before the cleanup, but have no reliance on each other.
-In this case we can set up the dependencies as follows:
-
-1.  queue start job
-2.  queue processing job1, depends on start job
-3.  queue processing job2, depends on start job
-4.  queue processing job3, depends on start job
-5.  ...
-6.  queue processing jobN, depends on start job
-7.  queue cleanup job, depends on all of the processing jobs
-
-In the above case it is highly likely that the processing jobs (1..N) will be copies of each other, with only a small change in the way that the processing is done.
-For example: the start job can download a lot of data, and the individual processing jobs are processing the same data, but testing different models each time.
-In this case the parameters of the models are all that is changing in the job files.
-We could either set up a template system to make a copy of the template job, and then alter the parameters within, and submit them according to the above scheme, or we could get SLURM to do this work for us.
-
-This brings us to the concept of **array jobs**.
-In an array job we write a single script that is submitted to SLURM, but we tell it that we want multiple copies of this job to run.
-Within the job we then identify the ID or job number, and use that to set up the parameters for the job.
-
-TODO: link / advert the NextFlow workshop!
-
-<!-- 
-TODO FROM HERE
-Let's explore this idea with a simple example.
-
-We have a process that does some simulation based on initial parameters and we want to run this on various different inputs and collect the results in a summary file.
-Our workflow is:
-1. set up the parameters for each of the simulations
-2. run the simulation on each set of parameters
-3. collate all the results together in one file
-
-The simulation that we want to run is computing the area and perimeter of a regular polygon (an N-gon) which is inscribed within the unit circle.
-Our simulation is contained within the following python script:
-
-> ## area_of_ngon.py 
-> ~~~
-> #! /usr/bin/env python
+> ## Parallel workflows
+> We will be discussing parallel computing in [another lesson]({{page.root}}{% link _episodes/ParallelComputing.md %}) in more depth.
+> As a prelude to that lesson lets consider a workflow which has a structure more like the following:
 > 
-> import argparse
-> import math
-> import sys
+> ![DiamondWorkflow]({{page.root}}{% link fig/DiamondWorkflow.png %})
 > 
+> In this workflow we have a single job which fetches all the data that we need to process, and then multiple processing jobs which are independent of each other, followed by a cleanup job.
+> The dependency indicated by the arrows shows that the different processing jobs need to happen after the data retrieval and before the cleanup, but have no reliance on each other.
+> In this case we can set up the dependencies as follows:
 > 
-> def area_perimeter_ngon(n=3):
->   """
->   Compute the area and perimeter of a regular N-gon
->   inscribed within a cirlce of radius 1.
->   """
->   # Complain if n<3 because those shapes don't exist
->   if n<3:
->     raise AssertionError(f"Cannot compute area for ngon when n={n}")
->   r = 1 # Radius of our circle
->   perimeter = 2*n*r * math.sin(math.pi/n)
->   area = 0.5 * n * r**2 * math.sin(2*math.pi/n)
->   return area, perimeter
+> 1.  queue start job
+> 2.  queue processing job1, depends on start job
+> 3.  queue processing job2, depends on start job
+> 4.  queue processing job3, depends on start job
+> 5.  ...
+> 6.  queue processing jobN, depends on start job
+> 7.  queue cleanup job, depends on all of the processing jobs
 > 
+> In the above case it is highly likely that the processing jobs (1..N) will be copies of each other, with only a small change in the way that the processing is done.
+> For example: the start job can download a lot of data, and the individual processing jobs are processing the same data, but testing different models each time.
+> In this case the parameters of the models are all that is changing in the job files.
+> We could either set up a template system to make a copy of the template job, and then alter the parameters within, and submit them according to the above scheme, or we could get SLURM to do this work for us.
 > 
-> if __name__ == "__main__":
->   parser = argparse.ArgumentParser()
->   parser.add_argument('n', default=None, type=int, help='Number of angles in our n-gon')
->   parser.add_argument('--out', dest='out', default='output.txt', type=str, help='output file')
->   options = parser.parse_args()
->   area, perimeter = area_perimeter_ngon(options.n)
->  
->   with open(options.out,'w') as f:
->     f.write(f'A {options.n}-gon inscribed within a unit circle has an area of {area:5.3f} and a perimeter of {perimeter:5.3f}\n')
-> ~~~
-> {: .language-python}
-{: .callout}
-
-Our script has been built in such a way that we can control it's behaviour using command line arguments:
-`area_of_ngon.py --out 3-gon.txt 3`
-
-Our setup script is:
-> ## start.sh
-> ~~~
-> #! /usr/bin/env bash
-> #
-> #PBS --job-name=start
-> #PBS --output=/fred/oz983/%u/start_%A_out.txt
-> #PBS --error=/fred/oz983/%u/start_%A_err.txt
-> #
-> #PBS --ntasks=1
-> #PBS --time=00:05:00
-> #PBS --mem-per-cpu=1G
+> This brings us to the concept of **array jobs**.
+> In an array job we write a single script that is submitted to SLURM, but we tell it that we want multiple copies of this job to run.
+> Within the job we then identify the ID or job number, and use that to set up the parameters for the job.
 > 
-> # move to the directory where the script/data are
-> cd /fred/oz983/${USER}
-> 
-> #make a file
-> touch input_data.txt
-> 
-> echo "doing some pre-processing work"
-> 
-> # put some data in
-> for i in 3 4 5 6 7 8;
-> do
->   echo ${i} >> input_data.txt
-> done
-> ~~~
-> {: .language-bash}
-{: .callout}
+> TODO: link / advert the NextFlow workshop!
+{: .solution}
 
-As you can see this start up script creates a file called `intput_data.txt` which contains the numbers 3..8.
-Also note that we have use `%u` in the path for the output and error logs.
-When we submit the job SLURM will replace `%u` with the username of the person submitting the job.
-Similarly, we have use `%A` as part of the file name, and SLURM will replace this with the jobid.
-The end result is that our error and ouput logs will look like:
-`/fred/oz983/phancock/start_123456_out.txt`
-and if we run our script multiple times, the log files wont get over written.
-
-We then create a script that will read one of the lines from this file, and use it to run our python script.
-This script is part of an array job.
-We use `--array=start-end` to indicate that this is an array job and what job indicies we would like to use.
-
-> ## branch.sh
-> ~~~
-> #! /usr/bin/env bash
-> #
-> #PBS --job-name=ngon
-> #PBS --output=/fred/oz983/%u/ngon_%A-%a_out.txt
-> #PBS --error=/fred/oz983/%u/ngon_%A-%a_err.txt
-> #
-> #PBS --ntasks=1
-> #PBS --time=00:05:00
-> #PBS --mem-per-cpu=1G
-> #PBS --array=1-6
-> 
-> # load modules
-> module load python/3.8.5
-> 
-> # move to the directory where the script/data are
-> cd /fred/oz983/${USER}
-> 
-> data_file='input_data.txt'
-> 
-> # read the i-th line of the data file (where i is the array number)
-> # and stor it as "n"
-> n=$(sed -n ${SLURM_ARRAY_TASK_ID}p ${data_file})
-> 
-> echo "I'm array job number ${SLURM_ARRAY_TASK_ID}"
-> echo "My n-gon number is ${n}"
-> 
-> python3 ../KLuken_HPC_workshop/area_of_ngon.py --out ${n}-gon.txt ${n}
-> ~~~
-> {: .language-bash}
-{: .callout}
-
-The script `branch.sh` is doing a few new things we should note:
-- we use `%a` to use the array task id in the filename of the output (eg `ngon_123456-1_out.txt`). 
-- we set `--array=1-6` to indicate that we want six jobs to run with task ids of 1,2,3,4,5 and 6.
-- we read the environment variable `${SLURM_ARRA_TASK_ID}` to determine the task id
-- we use sed to print the line from the data file corresponding to our task id and save it as `n`
-- run our simulation script with parameter `${n}`
-
-Finally our collect and clean up script looks like:
-
-> ## collect.sh
-> ~~~
-> #! /usr/bin/env bash
-> #
-> #PBS --job-name=collect
-> #PBS --output=/fred/oz983/%u/collect_%A_out.txt
-> #PBS --error=/fred/oz983/%u/collect_%A_err.txt
-> #
-> #PBS --ntasks=1
-> #PBS --time=00:05
-> #PBS --mem-per-cpu=200
-> 
-> 
-> # move to the directory where the script/data are
-> cd /fred/oz983/${USER}
-> 
-> # list all the files that we will 'process'
-> files=$(ls *gon.txt)
-> 
-> # this is where the 'proccessed' data will end up
-> outfile=collected.txt
-> 
-> echo "collecting outputs from : ${files}"
-> echo "results will be in: ${outfile}"
-> 
-> # delete the outfile before we write to it
-> if [[ -e ${outfile} ]]; then rm ${outfile};fi
-> 
-> # do the 'processing' and write to the outfile
-> for f in ${files}; do
->   cat ${f} >> ${outfile}
->   # delete the intermediate files to save space
->   rm ${f}
-> done
-> 
-> 
-> echo "Phew! Hard work complete..."
-> ~~~
-> {: .language-bash}
-{: .callout}
-
-There isn't much new in the collect script, except to note that we also delete the intermediate data files.
-
-With all of the above in place we can then make our workflow run using the following three commands.
-
-~~~
-[phancock@farnarkle1 phancock]$ sbatch --begin=now+120 ../KLuken_HPC_workshop/start.sh
-Submitted batch job 29442061
-[phancock@farnarkle1 phancock]$ sbatch -d afterok:29442061 ../KLuken_HPC_workshop/branch.sh
-Submitted batch job 29442065
-[phancock@farnarkle1 phancock]$ sbatch -d afterok:29442065 ../KLuken_HPC_workshop/collect.sh
-Submitted batch job 29442066
-~~~
-{: .output}
-
-The `--begin=now+120` tells SLURM that we don't want the first job to start for another 2 minutes.
-This is just gives us time to set up the dependencies before the job runs.
-
-Note: when we set up the dependency for the collect script we just need to refer to the array job id and not all the individual tasks.
-Slurm will automatically wait until all parts of a job have completed before resolving dependencies.
-
-We can watch the jobs move through different stages of the queue as follows.
-~~~
-[phancock@farnarkle1 phancock]$ watch squeue -u ${USER}
-             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
-          29442061   skylake    start phancock PD       0:00      1 (BeginTime)
-          29442066   skylake  collect phancock PD       0:00      1 (Dependency)
-    29442065_[1-6]   skylake     ngon phancock PD       0:00      1 (Dependency)
-# Start job is waiting to begin, others are waiting for dependency to be resolved
-
-             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
-          29442061   skylake    start phancock CG       0:04      1 john31
-          29442066   skylake  collect phancock PD       0:00      1 (Dependency)
-    29442065_[1-6]   skylake     ngon phancock PD       0:00      1 (Dependency)
-# start job is running, others are waiting on dependency
-
-             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
-        29442065_6   skylake     ngon phancock PD       0:00      1 (Priority)
-        29442065_5   skylake     ngon phancock PD       0:00      1 (Priority)
-        29442065_4   skylake     ngon phancock PD       0:00      1 (Priority)
-        29442065_3   skylake     ngon phancock PD       0:00      1 (Priority)
-        29442065_2   skylake     ngon phancock PD       0:00      1 (Priority)
-          29442066   skylake  collect phancock PD       0:00      1 (Dependency)
-        29442065_1   skylake     ngon phancock PD       0:00      1 (Priority)
-# start job has completed, the ngon jobs are waiting in the queue ready to start
-# the collect job is still waiting on dependencies to be resolved
-
-             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
-          29442066   skylake  collect phancock PD       0:00      1 (Priority)
-# all the ngon jobs are finished and now the collect job is waiting to start
-
-             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
-# all jobs now complete
-~~~
-{: .output}
-
-We now have an understanding of how to run job on and HPC with SLURM, how to create a workflow, and monitor the status of our jobs.
-The we will now focus on doing jobs that are a more than just printing things, and for this we'll need some of our own software. -->
-
-## How do I install software on an HPC
-As noted in a [previous lesson]({{page.root}}{% link _episodes/WhatIsHPC.md %}#software), the HPC facility administrators manage a lot of software.
-For software that is provided by the HPC facility we can use the module system to load the required software/version.
-In the previous exercises you saw this happen when we called `module load python3/3.8.5`.
-We will explore the module system in more detail and then learn how to build and install our own software.
-
-### The LMOD module system
-The [LMOD](https://lmod.readthedocs.io/en/latest/) software is designed to allow users of an HPC facility to manage which software they are using at a given time.
-When a user loads a module, the lmod system will set a bunch of different environment variables that are needed to run the particular software.
-Additionally, additional modules (dependencies) will be loaded (or unloaded) to minimise version conflicts.
-
-When we first log into OzSTAR we have a farily limited set of modules already loaded:
-~~~
-[phancock@farnarkle1 ~]$ module list
-
-Currently Loaded Modules:
-  1) nvidia/.latest (H,S)   2) slurm/.latest (H,S)
-~~~
-{: .output}
-
-If we want to have access to a python interpreter we can try the following:
-~~~
-[phancock@farnarkle1 ~]$ module load python
-Lmod has detected the following error:  Couldn't find module with name python, did you mean to load one of the following?
-        * python/.3.6.4-numpy-1.14.1
-        * python/3.6.4
-        * python/.2.7.14-numpy-1.14.1
-        * python/3.8.5
-        * python/3.7.4
-        * python/3.6.9
-        * python/2.7.14
-        * python/3.10.4 
-~~~
-{: .output}
-
-As can be seen from the error message, there are multiple versions of python installed on this system, and none of them are set as the default version.
-We need to specify the version that we want to load using `module load python/3.8.5`
-Once we've done this we can see that python is now loaded along with a set of dependent libraries:
-~~~
-[phancock@farnarkle1 ~]$ module list
-
-Currently Loaded Modules:
-  1) nvidia/.latest (H,S)   3) gcccore/9.2.0     5) gcc/9.2.0     7) openmpi/4.0.2     9) sqlite/3.21.0  11) openssl/1.1.1g
-  2) slurm/.latest  (H,S)   4) binutils/2.33.1   6) hwloc/2.0.3   8) imkl/2019.5.281  10) zlib/1.2.11    12) python/3.8.5
-~~~
-{: .output}
-
-In loading python we've actually loaded **10** modules.
-Thankfully we didn't have to track these dependencies down and load them ourselves!
-
-If we want to see a list of all the modules that are available we can run `module avail`, but it is a very long and exhaustive list that is hard to browse.
-Instead, if we want to search for a library or module we can use `module spider <name>`.
-
-> ## Find some modules
-> Use `module spider` to figure out what versions of the scipy python module are available.
-> > ## answer
-> > ~~~
-> > [phancock@farnarkle1 ~]$ module spider scipy
-> > 
-> > ------------------------------------------------------------------------------------------------------------------------
-> >   scipy:
-> > ------------------------------------------------------------------------------------------------------------------------
-> >     Description:
-> >       SciPy is a collection of mathematical algorithms and convenience functions built on the Numpy extension for
-> >       Python.
-> > 
-> >      Versions:
-> >         scipy/1.0.0-python-2.7.14
-> >         scipy/1.0.0-python-3.6.4
-> >         scipy/1.0.1-python-3.6.4
-> >         scipy/1.3.0-python-3.6.4
-> >         scipy/1.4.1-python-3.7.4
-> >         scipy/1.4.1-python-3.8.5
-> >         scipy/1.6.0-python-3.7.4
-> >         scipy/1.6.0-python-3.8.5
-> >         scipy/1.8.0-python-3.10.4
-> >      Other possible modules matches:
-> >         scipy-bundle
-> > 
-> > ------------------------------------------------------------------------------------------------------------------------
-> >   To find other possible module matches execute:
-> > 
-> >       $ module -r spider '.*scipy.*'
-> > 
-> > ------------------------------------------------------------------------------------------------------------------------
-> >   For detailed information about a specific "scipy" module (including how to load the modules) use the module's full name.
-> >   For example:
-> > 
-> >      $ module spider scipy/1.8.0-python-3.10.4
-> > ------------------------------------------------------------------------------------------------------------------------
-> > ~~~
-> > {: .output}
-> {: .solution}
-{: .challenge}
-
-The `module spider` command will also match partial strings so if you use `module spider zip` it will show you all the modules with zip in the name.
-Once you locate the module you want to use you'll need to include `module load program/version` in all of your job scripts before that program can be used.
-If you end up in the not so nice situation where you need to run different versions of a program at different parts of your job you can use `module unload pogram/version` or `module swap old_program/version new_program/version` to change versions.
-This is occasionally needed when the software you rely on was not written/built/installed by you.
-
-TODO backlink to containers.
