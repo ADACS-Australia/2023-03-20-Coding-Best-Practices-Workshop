@@ -263,8 +263,9 @@ if __name__ == "__main__":
 
 You'll notice the original code for writing a CSV is back. 
 
-Upon further investigation after changing to `np.random.uniform` we found that `np.savetxt` was slower than the code we had written previously! This is a quick lesson that Python is a **high level** language and while we assume that packages such as NumPy almost always have faster functions, this isn't always true as we don't know what's happening under the hood. This is why we described optimization as a loop, you'll try ideas, some will work, others won't, this is a natural part of the process. Sometimes though, code can't be made faster quickly as we found out in the case here, we tried to find a faster way to write a CSV, and there probably is one, but we have declared it's fast enough for our use case.
+Upon further investigation after changing to `np.random.uniform` we found that `np.savetxt` was slower than the code we had written previously.
 
+This is a quick lesson in Python is a **high level** language and while we assume that packages such as NumPy always have faster functions, this isn't always true as we don't know what's happening under the hood. This is why we described optimization as a loop, you'll try ideas, some will work, others won't, this is a natural part of the process. Sometimes though, code can't be made faster quickly as we found out in the case here, we tried to find a faster way to write a CSV, and there probably is one, but we have declared it's fast enough for our use case.
 
 ![scalene_profile]({{page.root}}{% link fig/ScaleneOptimized.png %})
 
