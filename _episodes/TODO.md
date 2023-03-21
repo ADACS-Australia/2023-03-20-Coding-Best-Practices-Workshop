@@ -18,20 +18,21 @@
 - [x] Add a gitworkflow page that includes basics of branching, foreshadow wednesday content.
 
 ## Before Wednesday
-
+- [x] Create menti survey and link on the etherpad
 - [ ] Convert SLURM -> PBS for all lessons
   - [x] What is HPC
-  - [ ] Working on HPC
-  - [ ] Testing, benchmarking, profiling
-- [ ] Add scalene images to profiling
+  - [x] Working on HPC (shorten?)
+  - [x] Testing, benchmarking, profiling
+- [x] Add scalene images to profiling
 - [ ] Outline profiling activity with some modifications
   - [ ] Link our modifications back to our best practices
-  - [ ] Use different branches for our different optimization ideas
-- [ ] Shorten the working on HPC job dependency part and put an advert for NextFlow
-- [ ] Go through lessons and link to best practices where we can
-- [ ] Review lessons for additional challenges
-- [ ] review challenges for opportunities to use ether pad
-- [ ] Wherever we make changes to code remind people to `git commit`
+- [x] parallelization
+  - [x] Use different branches for our different parallelization ideas
+- [x] Shorten the working on HPC job dependency part and put an advert for NextFlow
+- [x] Go through lessons and link to best practices where we can
+- [x] Review lessons for additional challenges
+- [x] review challenges for opportunities to use ether pad
+- [x] Wherever we make changes to code remind people to `git commit`
 
 ## extras?
 - [ ] type hints for python is becoming more common (IDE section)
