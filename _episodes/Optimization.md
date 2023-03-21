@@ -23,7 +23,7 @@ Therefore:
 2. *then* on your total wait time, 
 2. *then* on cpu time.
 
-Avoid premature optimisation:
+Avoid premature optimization:
 ![ObligatoryXKCD](https://imgs.xkcd.com/comics/is_it_worth_the_time.png)
 
 Verify that you **have** a problem before you spend resources **fixing** a problem.
@@ -74,3 +74,24 @@ For example:
   - a fast, powerful, flexible and easy to use open source data analysis and manipulation tool, built on top of the Python programming language.
 
 These packages can provide significant performance increases, often by implementing parallel processing under the hood, without you having to write or manage any of the parallel computing components.
+
+optimization -> profile, idea, implement, profile, better?
+
+show openAI integration magics
+
+options:
+- scalene (entire codebase)
+- jupyter magics for snippets. %timit (also in ipython)
+
+~~~
+In [2]: import numpy as np
+
+In [3]: %timeit np.ones(100)
+1.76 µs ± 43.3 ns per loop (mean ± std. dev. of 7 runs, 100,000 loops each)
+
+In [4]: %timeit np.empty(100)
+222 ns ± 9.64 ns per loop (mean ± std. dev. of 7 runs, 1,000,000 loops each)
+~~~
+{: .language-python}
+
+note: beware of scaling, do bigger tests
