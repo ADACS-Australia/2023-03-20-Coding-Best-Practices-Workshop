@@ -125,9 +125,9 @@ Let's rerun scalene without `sky_sim_opt.py`
 
 ![scalene_profile]({{page.root}}{% link fig/ScaleneOptimizationProfileNumPy.png %})
 
-That is an unfortunate result, however we have increased the time spent in native which a good thing. At the moment we are converting our list of floats into NumPy arrays, this has a cost of copying the lists from Python memory to the memory used for the native array in NumPy. The copying of arrays from Python to NumPy generally means it's recommended that you start with NumPy arrays and then do operations on the arrays themselves using NumPy vectorized functions (we will cover vectorization more in [parallel computing]({{page.root}}{% link _episodes/ParallelComputing.md %})). 
+That is an unfortunate result, however we have increased the time spent in native which is a good thing. At the moment we are converting our list of floats into NumPy arrays, this has a cost of copying the lists from Python memory to the memory used for the native array in NumPy. The copying of arrays from Python to NumPy generally means it's recommended that you start with NumPy arrays and then do operations on the arrays themselves using NumPy vectorized functions (we will cover vectorization more in [parallel computing]({{page.root}}{% link _episodes/ParallelComputing.md %})). 
 
-To initialize our arrays, most would suggest we initialize with an array containing only zeros using `np.zeros`, however because we are filling the array later, we can use a slightly faster operation `np.empty`. To show the difference between `np.zeros` and `np.empty` we can use the `ipython %timeit` magic. If you installed Python through Anaconda, `ipython` should already be installed, otherwise run `pip install ipython`. Inside your bash terminal run `ipython`, and run the following commands:
+To initialize our arrays, most would suggest we initialize with an array containing only zeros using `np.zeros`, however because we are filling the array with values later, we can use a slightly faster operation `np.empty`. To show the difference between `np.zeros` and `np.empty` we can use the `ipython %timeit` magic. If you installed Python through Anaconda, `ipython` should already be installed, otherwise run `pip install ipython`. Inside your bash terminal run `ipython`, and run the following commands:
 
 ~~~
 import numpy as np
@@ -151,7 +151,7 @@ In [3]: %timeit np.empty(1000000)
 ~~~
 {: .output}
 
-From the result of `%timeit`, we can see `np.empty` is measured in nanoseconds compared to microseconds for zeros. When comparing NumPy functions and functions that do similar things in general tools like `%timeit` are very useful. Tools like `%timeit` allows us to benchmark snippets of code to ensure our ideas of optimization do make sense (because having ideas is good, but testing them is even better).
+From the result of `%timeit`, we can see `np.empty` is measured in nanoseconds compared to microseconds for zeros, you'll also notice `np.empty` completed 1000x more loops than `np.zeros` in the same amount of time, impressive! When comparing NumPy functions and functions that do similar things in general tools like `%timeit` are very useful. Tools like `%timeit` allows us to benchmark snippets of code to ensure our ideas of optimization do make sense (because having ideas is good, but testing them is even better).
 
 Although, as we look further into the NumPy documentation for more ideas we find the [`np.random.uniform`](https://numpy.org/doc/stable/reference/random/generated/numpy.random.uniform.html#numpy-random-uniform) function. This allows us to create a NumPy array of random values between a low and a high value of a certain size if we so wish. Using `np.random.uniform` we eliminate the comparatively slower Python for loop, and have `make_stars` run much faster.
 
@@ -215,7 +215,7 @@ def make_stars(ra: float, dec: float, num_stars: int) -> Tuple[np.ndarray, np.nd
     # Making these as a numpy function allowed us to remove the comparably slow for loop, and take advantage of vectorization that numpy offers.
     ras = np.random.uniform(ra - 1, ra + 1, size = num_stars)
     decs = np.random.uniform(dec - 1, dec + 1, size = num_stars)
-    return (ras, decs)
+    return (ras.tolist(), decs.tolist())
 
 
 def skysim_parser():
@@ -249,11 +249,11 @@ def main():
     # We are now returning numpy arrays
     ras, decs = make_stars(ra,dec, NSRC)
 
-    # Stack the arrays together
-    radec_coord = np.column_stack((ras, decs))
-    # We stack the arrays together, and use savetxt with a comma delimiter
-    np.savetxt(options.out, radec_coord, delimiter=",")
-    
+    # now write these to a csv file for use by my other program
+    with open(options.out,'w') as f:
+        print("id,ra,dec", file=f)
+        for i in range(NSRC):
+            print(f"{i:07d}, {ras[i]:12f}, {decs[i]:12f}", file=f)
     print(f"Wrote {options.out}")
 
 if __name__ == "__main__":
@@ -261,12 +261,21 @@ if __name__ == "__main__":
 ~~~
 {: .language-python}
 
-TODO: Show Scalene Result (My current implementation is slower on my machine regardless of size?!)
+You'll notice the original code for writing a CSV is back. 
 
-TODO: Demonstrate OpenAI Code in class (it doesn't suggest anything different from the code I've created currently)
+Upon further investigation after changing to `np.random.uniform` we found that `np.savetxt` was slower than the code we had written previously! This is a quick lesson that Python is a **high level** language and while we assume that packages such as NumPy almost always have faster functions, this isn't always true as we don't know what's happening under the hood. This is why we described optimization as a loop, you'll try ideas, some will work, others won't, this is a natural part of the process. Sometimes though, code can't be made faster quickly as we found out in the case here, we tried to find a faster way to write a CSV, and there probably is one, but we have declared it's fast enough for our use case.
+
+
+![scalene_profile]({{page.root}}{% link fig/ScaleneOptimized.png %})
+
+> ## It's time for you to see if you can make `sky_sim_opt` faster
+> 
+> In your own time, feel free to try and see if you can optimize `sky_sim_opt.py` further, and if you do, let us know on the etherpad!
+> 
+{: .challenge}
 
 >## Bonus Note
->Sometimes when optimizing workloads, you can encounter situations where your code only runs faster in larger workloads, often optimizations employed
+>Sometimes when optimizing code, you can encounter situations where your optimized code only runs faster in larger workloads, often optimizations employed
 >may require the packages to do additional setup due to parallelization happening underneath or perhaps some memory wrangling needed underneath.
 >Whatever the reason it may be, when benchmarking, profiling and optimizing your code it's important you test the code under small and large workloads.
 >Generally most optimize for the larger workloads rather than the smaller workloads, usually the extra setup cost for small workloads is worth it in comparison to the time saved on large workloads.
