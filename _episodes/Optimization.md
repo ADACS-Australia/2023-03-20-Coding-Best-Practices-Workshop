@@ -3,11 +3,16 @@ title: "Optimization"
 teaching: 15
 exercises: 15
 questions:
-- "TODO"
+- "How can I optimize my code?"
+- "What am I even optimizing for?"
 objectives:
-- "TODO"
+- "Review the different resources we can optimize for"
+- "Understand the optimization loop"
+- "Make our example code run at least a little faster"
 keypoints:
-- "TODO"
+- "After a while you'll remember some of these optimization things and do them by default (esp, NumPy things)"
+- "Without profiling you are just guessing at what the problems is"
+- "Know when to stop"
 ---
 
 Optimize your total workflow:
@@ -21,7 +26,7 @@ Paul’s rule of thumb:
 Therefore: 
 1. Focus on reducing **your** active interaction time,
 2. *then* on your total wait time, 
-2. *then* on cpu time.
+3. *then* on cpu time.
 
 Avoid premature optimization:
 ![ObligatoryXKCD](https://imgs.xkcd.com/comics/is_it_worth_the_time.png)
