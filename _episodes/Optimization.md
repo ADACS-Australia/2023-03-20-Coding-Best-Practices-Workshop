@@ -50,12 +50,12 @@ Embrace sticky tape solutions:
 - Optimize only when there is a problem 
 
 
-## leveraging the work of others
+## Leveraging the work of others
 There are a lot of python packages that are designed, directly or indirectly, to provide optimized python code.
 For example:
-- [Numpy](https://numpy.org/)
+- [NumPy](https://numpy.org/)
   - The fundamental package for scientific computing with Python
-- [Scipy](https://scipy.org/)
+- [SciPy](https://scipy.org/)
   - Fundamental algorithms for scientific computing in Python
   - extends upon Numpy to provide additional data structures and algorithms
 - [Numba](https://numba.pydata.org/)
@@ -75,23 +75,195 @@ For example:
 
 These packages can provide significant performance increases, often by implementing parallel processing under the hood, without you having to write or manage any of the parallel computing components.
 
-optimization -> profile, idea, implement, profile, better?
+## The Optimization Loop
 
-show openAI integration magics
+Using `scalene` we'll re-run our initial profiling to ensure the results are consistent with the [profiling]({{page.root}}{% link _episodes/BenchmarkingAndProfiling.md %}) we did in the previous lesson. 
 
-options:
-- scalene (entire codebase)
-- jupyter magics for snippets. %timit (also in ipython)
+![scalene profile]({{page.root}}{% link fig/ScaleneOptimizationProfileStart.png %})
+
+We should see the I/O is still the main bottleneck and as per Amdahl's law we should fix that first.
+
+One idea we can try first is to speed up the I/O (system) time by utlising the [NumPy](https://numpy.org/) python module we are already using in several places. 
+NumPy has a way to quickly store data arrays into a file using the `savetxt` function.
+
+For our exercise, we'll create a new file in our `mymodule` directory and call it `sky_sim_opt.py` and copy the contents of your `sky_sim.py` into `sky_sim_opt.py`.
+
+Using NumPy we can change the `main` function which runs all the functions to create our sources and then saves the csv file. To do this we'll turn the `ras` and `decs` variables into 
 
 ~~~
-In [2]: import numpy as np
+# Make sure to include an import to numpy as np at the top of your file.
+import numpy as np
 
-In [3]: %timeit np.ones(100)
-1.76 µs ± 43.3 ns per loop (mean ± std. dev. of 7 runs, 100,000 loops each)
+...
 
-In [4]: %timeit np.empty(100)
-222 ns ± 9.64 ns per loop (mean ± std. dev. of 7 runs, 1,000,000 loops each)
+def main():
+    parser = skysim_parser()
+    options = parser.parse_args()
+    # if ra/dec are not supplied the use a default value
+    if None in [options.ra, options.dec]:
+        ra, dec = get_radec()
+    else:
+        ra = options.ra
+        dec = options.dec
+    
+    ras, decs = make_stars(ra,dec, NSRC)
+
+    # Turn our list of floats into NumPy arrays
+    ras = np.array(ras)
+    decs = np.array(decs)
+    # We stack the arrays together, and use savetxt with a comma delimiter
+    np.savetxt(options.out, np.stack((ras, decs), axis = -1), delimiter=",")
+    print(f"Wrote {options.out}")
 ~~~
 {: .language-python}
 
-note: beware of scaling, do bigger tests
+Let's rerun scalene without `sky_sim_opt.py`
+
+![scalene_profile]({{page.root}}{% link fig/ScaleneOptimizationProfileNumPy.png %})
+
+That is an unfortunate result, however we have increased the time spent in native which a good thing. At the moment we are converting our list of floats into NumPy arrays, this has a cost of copying the lists from Python memory to the memory used for the native array in NumPy. The copying of arrays from Python to NumPy generally means it's recommended that you start with NumPy arrays and then do operations on the arrays themselves using NumPy vectorized functions (we will cover vectorization more in [parallel computing]({{page.root}}{% link _episodes/ParallelComputing.md %})). 
+
+To initialize our arrays, most would suggest we initialize with an array containing only zeros using `np.zeros`, however because we are filling the array later, we can use a slightly faster operation `np.empty`. To show the difference between `np.zeros` and `np.empty` we can use the `ipython %timeit` magic. If you installed Python through Anaconda, `ipython` should already be installed, otherwise run `pip install ipython`. Inside your bash terminal run `ipython`, and run the following commands:
+
+~~~
+import numpy as np
+%timeit np.zeros(1000000)
+%timeit np.empty(1000000)
+~~~
+{: .language-python}
+
+~~~
+Python 3.8.16 | packaged by conda-forge | (default, Feb  1 2023, 16:01:55) 
+Type 'copyright', 'credits' or 'license' for more information
+IPython 8.11.0 -- An enhanced Interactive Python. Type '?' for help.
+
+In [1]: import numpy as np
+
+In [2]: %timeit np.zeros(1000000)
+317 µs ± 596 ns per loop (mean ± std. dev. of 7 runs, 1,000 loops each)
+
+In [3]: %timeit np.empty(1000000)
+278 ns ± 0.92 ns per loop (mean ± std. dev. of 7 runs, 1,000,000 loops each)
+~~~
+{: .output}
+
+From the result of `%timeit`, we can see `np.empty` is measured in nanoseconds compared to microseconds for zeros. When comparing NumPy functions and functions that do similar things in general tools like `%timeit` are very useful. Tools like `%timeit` allows us to benchmark snippets of code to ensure our ideas of optimization do make sense (because having ideas is good, but testing them is even better).
+
+Although, as we look further into the NumPy documentation for more ideas we find the [`np.random.uniform`](https://numpy.org/doc/stable/reference/random/generated/numpy.random.uniform.html#numpy-random-uniform) function. This allows us to create a NumPy array of random values between a low and a high value of a certain size if we so wish. Using `np.random.uniform` we eliminate the comparatively slower Python for loop, and have `make_stars` run much faster.
+
+Employing `np.random.uniform` change alongside our NumPy `savetxt` we get the following `sky_sim_opt`:
+
+~~~
+"""
+A script to simulate a population of stars around the Andromeda galaxy
+"""
+
+# convert to decimal degrees
+import math
+import argparse
+import numpy as np
+from typing import Tuple
+
+NSRC = 1_000_000
+
+def get_radec() -> Tuple[float, float]:
+    """
+    Determine Andromeda location in ra/dec degrees
+
+    Returns
+    -------
+    tuple(ra: float, dec: float)
+        The Andromeda RA/DEC coordinate
+    """
+    # from wikipedia
+    RA = '00:42:44.3'
+    DEC = '41:16:09'
+
+    d, m, s = DEC.split(':')
+    dec = int(d)+int(m)/60+float(s)/3600
+
+    h, m, s = RA.split(':')
+    ra = 15*(int(h)+int(m)/60+float(s)/3600)
+    ra = ra/math.cos(dec*math.pi/180)
+    
+    return (ra, dec)
+
+
+def make_stars(ra: float, dec: float, num_stars: int) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Generate num_stars around a given RA/DEC coordinate given as floats in degrees.
+
+    Parameters
+    ----------
+    ra : float
+        The Right Ascension of the coordinate in the sky
+    dec : float
+        The Declination of the coordinate in the sky
+    num_stars : int
+        The number of stars we wish to generate
+
+    Returns
+    -------
+    ras : np.ndarray, decs: np.ndarray
+        A tuple of numpy arrays containing the RA and DEC coordinates in two arrays of the same size
+    """
+
+    # Making these as a numpy function allowed us to remove the comparably slow for loop, and take advantage of vectorization that numpy offers.
+    ras = np.random.uniform(ra - 1, ra + 1, size = num_stars)
+    decs = np.random.uniform(dec - 1, dec + 1, size = num_stars)
+    return (ras, decs)
+
+
+def skysim_parser():
+    """
+    Configure the argparse for skysim
+
+    Returns
+    -------
+    parser : argparse.ArgumentParser
+        The parser for skysim.
+    """
+    parser = argparse.ArgumentParser(prog='sky_sim', prefix_chars='-')
+    parser.add_argument('--ra', dest = 'ra', type=float, default=None,
+                        help="Central ra (degrees) for the simulation location")
+    parser.add_argument('--dec', dest = 'dec', type=float, default=None,
+                        help="Central dec (degrees) for the simulation location")
+    parser.add_argument('--out', dest='out', type=str, default='catalog.csv',
+                        help='destination for the output catalog')
+    return parser
+
+def main():
+    parser = skysim_parser()
+    options = parser.parse_args()
+    # if ra/dec are not supplied the use a default value
+    if None in [options.ra, options.dec]:
+        ra, dec = get_radec()
+    else:
+        ra = options.ra
+        dec = options.dec
+    
+    # We are now returning numpy arrays
+    ras, decs = make_stars(ra,dec, NSRC)
+
+    # Stack the arrays together
+    radec_coord = np.column_stack((ras, decs))
+    # We stack the arrays together, and use savetxt with a comma delimiter
+    np.savetxt(options.out, radec_coord, delimiter=",")
+    
+    print(f"Wrote {options.out}")
+
+if __name__ == "__main__":
+    main()
+~~~
+{: .language-python}
+
+TODO: Show Scalene Result (My current implementation is slower on my machine regardless of size?!)
+
+TODO: Demonstrate OpenAI Code in class (it doesn't suggest anything different from the code I've created currently)
+
+>## Bonus Note
+>Sometimes when optimizing workloads, you can encounter situations where your code only runs faster in larger workloads, often optimizations employed
+>may require the packages to do additional setup due to parallelization happening underneath or perhaps some memory wrangling needed underneath.
+>Whatever the reason it may be, when benchmarking, profiling and optimizing your code it's important you test the code under small and large workloads.
+>Generally most optimize for the larger workloads rather than the smaller workloads, usually the extra setup cost for small workloads is worth it in comparison to the time saved on large workloads.
+{: .callout}
