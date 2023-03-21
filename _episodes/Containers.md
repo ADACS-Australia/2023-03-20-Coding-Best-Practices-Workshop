@@ -481,7 +481,7 @@ Singularity offers multiple ways to interact with a container:
 > 2. Login to NCI
 > 3. Use `module load` to load `singularity/apptainer`
 > 4. Try the singularity run/exec/shell commands on your container
->
+> 
 > 
 > Reach out via the [etherpad]({{site.ether_pad}}) or raise your hand if you have questions or get stuck.
 > > ## Example
@@ -502,10 +502,10 @@ Singularity offers multiple ways to interact with a container:
 > >
 > > If this wasn't the case we could create the binding like this.
 > > ~~~
-> > singularity cmd -B $PWD:/app test.sif sky_sim.py
+> > singularity exec -B $PWD:/app test.sif sky_sim.py
 > > ~~~
 > > {: .language-bash}
-> > 
+> >
 > > ~~~
 > > singularity shell test.sif
 > > ~~~
