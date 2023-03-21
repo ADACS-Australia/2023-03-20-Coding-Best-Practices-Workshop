@@ -90,7 +90,7 @@ In this case we have a script called `greet.sh` ([here](https://raw.githubuserco
 > {: .language-bash}
 {: .callout}
 
-If we were to have a file which consisted of greetings (`greetings.txt`, [here](https://raw.githubusercontent.com/ADACS-Australia/2023-03-20-Coding-Best-Practices-Workshop/gh-pages/code/examples/greeting.txt)), one per line, we could use xargs to run our above script with the greeting as an argument:
+If we were to have a file which consisted of greetings (`greetings.txt`, [here](https://raw.githubusercontent.com/ADACS-Australia/2023-03-20-Coding-Best-Practices-Workshop/gh-pages/code/examples/greetings.txt)), one per line, we could use xargs to run our above script with the greeting as an argument:
 
 ~~~
 xargs -a greetings.txt -L 1 -exec ./greet.sh
