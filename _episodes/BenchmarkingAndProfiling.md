@@ -111,7 +111,7 @@ At the top of the page, scalene divides the time into three components: Python, 
 In order to reduce the total time, it is often advisable to convert python time into native time, which means replacing your python functions with system libraries.
 Using `numpy` modules is a great way to do this.
 
-> # Pro tip
+> ## Pro tip
 > NUMpy is more than just numerical python, there are a lot of functions that do things like read/write files, transform data types, and provide convenience functions for testing.
 >
 {: .callout}
