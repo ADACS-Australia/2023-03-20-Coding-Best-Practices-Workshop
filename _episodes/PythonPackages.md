@@ -265,11 +265,12 @@ requirements = ['numpy>=1.0',
                 ]
 
 setup(
-    name='mymodule',
+    name='mymodule', # the name of the module
+    packages=['mymodule'], # the location of the module
     version=0.1,
     install_requires=requirements,
     python_requires='>=3.8',
-    scripts=['scripts/runme']
+    entry_points={'console_scripts':['sky_sim= mymodule.sky_sim:main']}
 )
 ~~~
 {: .language-python}
@@ -309,11 +310,12 @@ def get_requirements():
     return requirements
 
 setup(
-    name='mymodule',
+    name='mymodule', # the name of the module
+    packages=['mymodule'], # the location of the module
     version=0.1,
     install_requires=get_requirements(),
     python_requires='>=3.8',
-    scripts=['scripts/runme']
+    entry_points={'console_scripts':['sky_sim= mymodule.sky_sim:main']}
 )
 ~~~
 {: .language-python}
@@ -326,7 +328,7 @@ Try it out!
 > If you have the right structure in your repository on github, then pip can install directly from github using the following:
 > `pip install git+https://github.com/[user]/[repo].git`
 >
-> You can even select a branch by appending `@branchname` to the github link!
+> You can even select a branch by appending `@branchname` to the github link, or `@commit-id` to select a particular commit.
 > 
 {: .callout}
 
