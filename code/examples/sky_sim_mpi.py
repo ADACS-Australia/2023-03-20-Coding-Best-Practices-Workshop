@@ -32,7 +32,7 @@ def get_radec():
     return ra,dec
 
 
-def make_positions(ra, dec, nsrc, outfile):
+def make_stars(ra, dec, nsrc, outfile):
     """
     """
 
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     ra,dec = get_radec()
     outfile = "catalog_mpi.csv"
     group_size = NSRC // size
-    make_positions(ra, dec, group_size, outfile)
+    make_stars(ra, dec, group_size, outfile)
     # synchronize before moving on
     comm.Barrier()
     # Select one process to collate all the files

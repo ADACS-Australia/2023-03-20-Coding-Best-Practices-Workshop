@@ -26,7 +26,7 @@ def get_radec():
     return ra,dec
 
 
-def make_positions(args):
+def make_stars(args):
     """
     """
     ra,dec,shape, nsrc, job_id = args    
@@ -44,7 +44,7 @@ def make_positions(args):
     radec[1, start:end] = decs
     return
 
-def make_positions_sharemem(ra,dec,nsrc=NSRC, cores=None):
+def make_stars_sharemem(ra,dec,nsrc=NSRC, cores=None):
     
     # By default use all available cores
     if cores is None:
@@ -67,7 +67,7 @@ def make_positions_sharemem(ra,dec,nsrc=NSRC, cores=None):
         ctx = multiprocessing.get_context()
         pool = ctx.Pool(processes=cores, maxtasksperchild=1)
         try:
-            pool.map_async(make_positions, args, chunksize=1).get(timeout=10_000_000)
+            pool.map_async(make_stars, args, chunksize=1).get(timeout=10_000_000)
         except KeyboardInterrupt:
             print("Caught kbd interrupt")
             pool.close()
@@ -89,7 +89,7 @@ def make_positions_sharemem(ra,dec,nsrc=NSRC, cores=None):
 
 if __name__ == "__main__":
     ra,dec = get_radec()
-    pos = make_positions_sharemem(ra,dec, NSRC, 2)
+    pos = make_stars_sharemem(ra,dec, NSRC, 2)
     # now write these to a csv file for use by my other program
     with open('catalog.csv', 'w') as f:
         print("id,ra,dec", file=f)

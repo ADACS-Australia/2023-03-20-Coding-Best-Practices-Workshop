@@ -355,7 +355,7 @@ Here is an implementation of our `sky_sim.py` code using multiprocessing.
 >     return ra,dec
 > 
 > 
-> def make_positions(args):
+> def make_stars(args):
 >     """
 >     """
 >     #unpack the arguments
@@ -370,7 +370,7 @@ Here is an implementation of our `sky_sim.py` code using multiprocessing.
 >     # return our results
 >     return radec
 > 
-> def make_positions_parallel(ra, dec, nsrc=NSRC, cores=None):
+> def make_stars_parallel(ra, dec, nsrc=NSRC, cores=None):
 >     
 >     # By default use all available cores
 >     if cores is None:
@@ -389,7 +389,7 @@ Here is an implementation of our `sky_sim.py` code using multiprocessing.
 > 
 >     try:
 >         # call make_posisions(a) for each a in args
->         results = pool.map(make_positions, args, chunksize=1)
+>         results = pool.map(make_stars, args, chunksize=1)
 >     except KeyboardInterrupt:
 >         # stop all the processes if the user calls the kbd interrupt
 >         print("Caught kbd interrupt")
@@ -403,7 +403,7 @@ Here is an implementation of our `sky_sim.py` code using multiprocessing.
 >         # crete an empty array to hold our results
 >         radec = np.empty((2,nsrc),dtype=np.float64)
 > 
->         # iterate over the results (a list of whatever was returned from make_positions)
+>         # iterate over the results (a list of whatever was returned from make_stars)
 >         for i,r in enumerate(results):
 >             # store the returned results in the right place in our array
 >             start = i*group_size
@@ -414,7 +414,7 @@ Here is an implementation of our `sky_sim.py` code using multiprocessing.
 > 
 > if __name__ == "__main__":
 >     ra,dec = get_radec()
->     pos = make_positions_parallel(ra, dec, NSRC, 2)
+>     pos = make_stars_parallel(ra, dec, NSRC, 2)
 >     # now write these to a csv file for use by my other program
 >     with open('catalog.csv', 'w') as f:
 >         print("id,ra,dec", file=f)
@@ -426,18 +426,18 @@ Here is an implementation of our `sky_sim.py` code using multiprocessing.
 
 
 There are two main things that we need to do differently in this version of the code compared to our original implementation.
-Firstly note that the code is largely unchanged, except for the introduction of a new function called `make_positions_parallel`, and that we have changed the call signature of the original function to just accept `args` instead of `ra, dec, nsrc`.
+Firstly note that the code is largely unchanged, except for the introduction of a new function called `make_stars_parallel`, and that we have changed the call signature of the original function to just accept `args` instead of `ra, dec, nsrc`.
 ~~~
-def make_positions(args):
+def make_stars(args):
     #unpack the arguments
     ra, dec, nsrc = args
 # was
-def make_positions(ra, dec, nsrc=NSRC):
+def make_stars(ra, dec, nsrc=NSRC):
 ~~~
 {: .language-python}
 We'll come back to why we changed this in a minute.
 
-The new function (`make_positions_parallel`) that we create is what I call the driving or wrapper function, and it is the one that handles all the multiprocessing.
+The new function (`make_stars_parallel`) that we create is what I call the driving or wrapper function, and it is the one that handles all the multiprocessing.
 The new function has the same call signature as the old function, but adds a new parameter called `cores` which has a default value.
 This means that the new function can act as a drop-in replacement for the old one.
 Within the new function we need to do the following:
@@ -473,7 +473,7 @@ The central location is `ra,dec` and the number of points is `nsrc=NSRC` (supply
 ### 3 divide the work into groups
 We can divide the task among `n` processes by having each of them compute `nsrc/n` points and then collecting all the generated points at the end.
 In our example we choose to divide the work into `20` batches, but we could also choose `n` or some integer multiple of `n`.
-For each batch of work we need to set up the argument list that we'll be sending to the `make_positions` function.
+For each batch of work we need to set up the argument list that we'll be sending to the `make_stars` function.
 ~~~
     # 20 jobs each doing 1/20th of the sources
     group_size = nsrc//20
@@ -505,13 +505,13 @@ From here we could reconstruct the intended ordering of the results.
 ### 5 send work teach of the workers
 We now have work to do and workers to complete it so we join them together.
 We could submit jobs to the pool one at a time using pool.
-We use the `map` method to apply the fucntion `make_positions` to each of the items in the iterable `args`.
+We use the `map` method to apply the fucntion `make_stars` to each of the items in the iterable `args`.
 ~~~
-results = pool.map(make_positions, args, chunksize=1)
+results = pool.map(make_stars, args, chunksize=1)
 ~~~
 {: .language-python}
 
-The reason that we had to rewrite the call sign for `make_positions` is because `pool.map` will only take one of the items from `args` at a time, so we bundled them into tuples.
+The reason that we had to rewrite the call sign for `make_stars` is because `pool.map` will only take one of the items from `args` at a time, so we bundled them into tuples.
 
 The child processes are now being created and will start working.
 
@@ -526,7 +526,7 @@ We do this by calling `pool.join()`, but we must first call `pool.close()` to in
 {: .language-python}
 
 ### 7 collect the results from each worker
-Each of or workers have executed the `make_positions` function, which returns a tuple of `(ras,decs)` and we now want to collect them all together into a single larger array.
+Each of or workers have executed the `make_stars` function, which returns a tuple of `(ras,decs)` and we now want to collect them all together into a single larger array.
 
 We could create empty python lists using `ras=[]` and append our results to these lists.
 However, appending to a list in python gets slower as the list gets longer.
@@ -544,7 +544,7 @@ We do this with `np.empty(shape, dtype)`
 
 And now we go about stuffing the results into the corresponding location in the new array.
 ~~~
-        # iterate over the results (a list of whatever was returned from make_positions)
+        # iterate over the results (a list of whatever was returned from make_stars)
         for i,r in enumerate(results):
             # store the returned results in the right place in our array
             start = i*group_size
@@ -648,7 +648,7 @@ Let's look at how we can do that in another example.
 >     return ra,dec
 > 
 > 
-> def make_positions(args):
+> def make_stars(args):
 >     """
 >     """
 >     ra,dec,shape, nsrc, job_id = args    
@@ -666,7 +666,7 @@ Let's look at how we can do that in another example.
 >     radec[1, start:end] = decs
 >     return
 > 
-> def make_positions_parallel(ra,dec,nsrc=NSRC, cores=None):
+> def make_stars_parallel(ra,dec,nsrc=NSRC, cores=None):
 >     
 >     # By default use all available cores
 >     if cores is None:
@@ -689,7 +689,7 @@ Let's look at how we can do that in another example.
 >         ctx = multiprocessing.get_context()
 >         pool = ctx.Pool(processes=cores, maxtasksperchild=1)
 >         try:
->             pool.map_async(make_positions, args, chunksize=1).get(timeout=10_000_000)
+>             pool.map_async(make_stars, args, chunksize=1).get(timeout=10_000_000)
 >         except KeyboardInterrupt:
 >             print("Caught kbd interrupt")
 >             pool.close()
@@ -711,7 +711,7 @@ Let's look at how we can do that in another example.
 > 
 > if __name__ == "__main__":
 >     ra,dec = get_radec()
->     pos = make_positions_parallel(ra,dec, NSRC, 2)
+>     pos = make_stars_parallel(ra,dec, NSRC, 2)
 >     # now write these to a csv file for use by my other program
 >     with open('catalog.csv', 'w') as f:
 >         print("id,ra,dec", file=f)
@@ -722,9 +722,9 @@ Let's look at how we can do that in another example.
 
 A quick summary of what is different this time (compared to our serial version):
 - we define a global variable (`mem_id`) which will indicate the shared memory location
-- we have modified `make_positions` to have an altered call signature (as before)
-  - `make_positions` no longer returns any data, but instead writes it directly to shared memory
-- we have a wrapper function `make_positions_sharemem` that will handle the creation of shared memory, creating child process, and then dishing out work.
+- we have modified `make_stars` to have an altered call signature (as before)
+  - `make_stars` no longer returns any data, but instead writes it directly to shared memory
+- we have a wrapper function `make_stars_sharemem` that will handle the creation of shared memory, creating child process, and then dishing out work.
 
 The overview of what we are doing is slightly different from before.
 Below is the process with the main changes in **bold**:
@@ -765,7 +765,7 @@ In this case we are going to eventually want an `np.array` that has shape `(2,NS
 
 In the above we create the shared memory with the `create=True` option.
 
-Within the child nodes, which are going to run `make_positions` we'll have to do a similar call, but this time with `create=False`
+Within the child nodes, which are going to run `make_stars` we'll have to do a similar call, but this time with `create=False`
 ~~~
     # Find the shared memory and create a numpy array interface
     shmem = SharedMemory(name=f'radec_{mem_id}', create=False)
@@ -778,9 +778,9 @@ Again in the `make_posistions` function, we want to treat the shared memory as i
 ~~~
 {: .language-python}
 
-since we need to know the `shape` of the numpy array in the `make_positions` function, we have to pass that as one of the arguments to the function.
+since we need to know the `shape` of the numpy array in the `make_stars` function, we have to pass that as one of the arguments to the function.
 
-One final modification we make to the `make_positions` function, is to save the results into this shared memory.
+One final modification we make to the `make_stars` function, is to save the results into this shared memory.
 In order to not step on the toes of any other process, we have to know where abouts this data should be written.
 In our example we use the `job_id` (process number) to figure out where abouts to write the data.
 ~~~
@@ -928,7 +928,7 @@ Continuing our `sky_sim` example we can use MPI to acheive our simulation task.
 >     return ra,dec
 > 
 > 
-> def make_positions(ra, dec, nsrc, outfile):
+> def make_stars(ra, dec, nsrc, outfile):
 >     """
 >     """
 > 
@@ -949,7 +949,7 @@ Continuing our `sky_sim` example we can use MPI to acheive our simulation task.
 >     ra,dec = get_radec()
 >     outfile = "catalog_mpi.csv"
 >     group_size = NSRC // size
->     make_positions(ra, dec, group_size, outfile)
+>     make_stars(ra, dec, group_size, outfile)
 >     # synchronize before moving on
 >     comm.Barrier()
 >     # Select one process to collate all the files
@@ -1006,10 +1006,10 @@ This time we don't need a complicated wrapper script, we just compute the amount
 {: .language-python}
 
 ### 3/4 do the work + write the output to a file
-Since each process will be writing it's own output file we pass a filename to our `make_positions` function along with the usual `ra, dec, nsrc`.
+Since each process will be writing it's own output file we pass a filename to our `make_stars` function along with the usual `ra, dec, nsrc`.
 Aditionally, we can't use the **same** file name for all processes so we have to modify the filename for each process:
 ~~~
-def make_positions(ra, dec, nsrc, outfile):
+def make_stars(ra, dec, nsrc, outfile):
     ...
     # return our results
     with open('{0}_part{1:03d}'.format(outfile, rank), 'w') as f:
@@ -1023,9 +1023,9 @@ def make_positions(ra, dec, nsrc, outfile):
 Note that we stuck the `.csv` header into the first file which is being written by the rank 0 process.
 
 ### 5 communicate that the work is done
-In each process, when the work is done and we have returned from the `make_positions` function we call:
+In each process, when the work is done and we have returned from the `make_stars` function we call:
 ~~~
-    make_positions(ra, dec, group_size, outfile)
+    make_stars(ra, dec, group_size, outfile)
     # synchronize before moving on
     comm.Barrier()
 ~~~

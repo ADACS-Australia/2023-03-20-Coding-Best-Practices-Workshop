@@ -34,7 +34,7 @@ def get_radec():
     return ra,dec
 
 
-def make_positions(ra,dec, nsrc=NSRC):
+def make_stars(ra,dec, nsrc=NSRC):
     """
     Generate NSRC stars within 1 degree of the given ra/dec
 
@@ -85,7 +85,7 @@ if __name__ == "__main__":
         ra = options.ra
         dec = options.dec
     
-    ras, decs = make_positions(ra,dec)
+    ras, decs = make_stars(ra,dec)
     # now write these to a csv file for use by my other program
     with open(options.out,'w') as f:
         print("id,ra,dec", file=f)

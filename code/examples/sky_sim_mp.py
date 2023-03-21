@@ -24,7 +24,7 @@ def get_radec():
     return ra,dec
 
 
-def make_positions(args):
+def make_stars(args):
     """
     """
     #unpack the arguments
@@ -39,7 +39,7 @@ def make_positions(args):
     # return our results
     return radec
 
-def make_positions_parallel(ra, dec, nsrc=NSRC, cores=None):
+def make_stars_parallel(ra, dec, nsrc=NSRC, cores=None):
     
     # By default use all available cores
     if cores is None:
@@ -58,7 +58,7 @@ def make_positions_parallel(ra, dec, nsrc=NSRC, cores=None):
 
     try:
         # call make_posisions(a) for each a in args
-        results = pool.map(make_positions, args, chunksize=1)
+        results = pool.map(make_stars, args, chunksize=1)
     except KeyboardInterrupt:
         # stop all the processes if the user calls the kbd interrupt
         print("Caught kbd interrupt")
@@ -72,7 +72,7 @@ def make_positions_parallel(ra, dec, nsrc=NSRC, cores=None):
         # crete an empty array to hold our results
         radec = np.empty((2,nsrc),dtype=np.float64)
 
-        # iterate over the results (a list of whatever was returned from make_positions)
+        # iterate over the results (a list of whatever was returned from make_stars)
         for i,r in enumerate(results):
             # store the returned results in the right place in our array
             start = i*group_size
@@ -83,7 +83,7 @@ def make_positions_parallel(ra, dec, nsrc=NSRC, cores=None):
 
 if __name__ == "__main__":
     ra,dec = get_radec()
-    pos = make_positions_parallel(ra, dec, NSRC, 2)
+    pos = make_stars_parallel(ra, dec, NSRC, 2)
     # now write these to a csv file for use by my other program
     with open('catalog.csv', 'w') as f:
         print("id,ra,dec", file=f)
