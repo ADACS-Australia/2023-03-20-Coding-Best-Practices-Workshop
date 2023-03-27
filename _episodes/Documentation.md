@@ -481,7 +481,7 @@ The simplest to use is the `pdoc` package which can be obtained from [pypi.org](
 {: .challenge}
 
 
-To make documentation that is less ephemeral you can use the the `-d docs` option to cause all the documentation to be built and then placed into the `docs` folder.
+To make documentation that is less ephemeral you can use the the `-o docs` option to cause all the documentation to be built and then placed into the `docs` folder.
 `pdoc` only supports `html` output, however other auto-documentation packages such as [sphinx](https://www.sphinx-doc.org/en/master/) can write latex (and thus pdf), ePub, man pages, or plain text.
 
 If you have automatically generated documentation then it you can set up a link between your github repo and a [read the docs ](rtfd.io) site.

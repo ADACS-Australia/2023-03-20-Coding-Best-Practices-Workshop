@@ -256,7 +256,7 @@ available at https://codimd.carpentries.org
 <h2 id="collaborative_notes">Collaborative Notes</h2>
 
 <p>
-We will use this <a href="{{ page.collaborative_notes }}">collaborative document</a> for chatting, taking notes, and sharing URLs and bits of code.
+We will use this <a href="{{ page.collaborative_notes }}">collaborative document</a> (archived <a href="{{page.root}}{% link files/EtherPadArchive.pdf %}"> here</a>) for chatting, taking notes, and sharing URLs and bits of code.
 </p>
 <hr/>
 {% endif %}

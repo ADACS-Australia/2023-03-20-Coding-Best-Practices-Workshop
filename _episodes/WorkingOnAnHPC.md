@@ -568,6 +568,11 @@ By using the `afterok` and `afternotok` dependencies it is possible to set up a 
 > In an array job we write a single script that is submitted to SLURM, but we tell it that we want multiple copies of this job to run.
 > Within the job we then identify the ID or job number, and use that to set up the parameters for the job.
 > 
-> TODO: link / advert the NextFlow workshop!
 {: .solution}
 
+Rather than get into a lot of details about how to create extended workflows using PBS dependencies, we recommend that you use a higher level workflow manager such as [NextFlow](https://nextflow.io/).
+Workflow managers like NextFlow (and others listed [here](http://meirwah.github.io/awesome-workflow-engines/)), allow you to describe a workflow using a meta-language that is independent of the platform that you are working on.
+This means that your workflow can be portable between laptop, desktop, HPC, and cloud with only small changes to a configuration file.
+Additionally, NextFlow will handle the use of containers, tracking of resource usage, and has options for how to manage failed tasks.
+
+If you are interested, we highly recommend that you check out the [ADACS NextFlow training](https://carpentries-incubator.github.io/Pipeline_Training_with_Nextflow/).

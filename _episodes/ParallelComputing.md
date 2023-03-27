@@ -631,6 +631,13 @@ Let's look at how we can do that in another example.
 > NSRC = 1_000_000
 > mem_id = None
 > 
+> 
+> def init(mem):
+>     global mem_id
+>     mem_id = mem
+>     return
+> 
+> 
 > def get_radec():
 >     # from wikipedia
 >     ra = '00:42:44.3'
@@ -648,7 +655,7 @@ Let's look at how we can do that in another example.
 > def make_stars(args):
 >     """
 >     """
->     ra,dec,shape, nsrc, job_id = args    
+>     ra, dec, shape, nsrc, job_id = args    
 >     # Find the shared memory and create a numpy array interface
 >     shmem = SharedMemory(name=f'radec_{mem_id}', create=False)
 >     radec = np.ndarray(shape, buffer=shmem.buf, dtype=np.float64)
@@ -663,14 +670,15 @@ Let's look at how we can do that in another example.
 >     radec[1, start:end] = decs
 >     return
 > 
-> def make_stars_parallel(ra,dec,nsrc=NSRC, cores=None):
->     
+> 
+> def make_stars_sharemem(ra, dec, nsrc=NSRC, cores=None):
+> 
 >     # By default use all available cores
 >     if cores is None:
 >         cores = multiprocessing.cpu_count()
->     
+> 
 >     # 20 jobs each doing 1/20th of the sources
->     args = [(ra, dec, (2,nsrc), nsrc//20, i) for i in range(20)]
+>     args = [(ra, dec, (2, nsrc), nsrc//20, i) for i in range(20)]
 > 
 >     exit = False
 >     try:
@@ -678,15 +686,27 @@ Let's look at how we can do that in another example.
 >         global mem_id
 >         mem_id = str(uuid.uuid4())
 > 
->         nbytes = 2 * nsrc * np.float64(1).nbytes
->         radec = SharedMemory(name=f'radec_{mem_id}', create=True, size=nbytes)
 > 
->         # start a new process for each task, hopefully to reduce residual
+>         nbytes = 2 * nsrc * np.float64(1).nbytes
+>         radec = SharedMemory(name=f'radec_{mem_id}', create=True, > size=nbytes)
+> 
+>         # creating a new process will start a new python interpreter
+>         # on linux the new process is created using fork, which > copies the memory
+>         # However on win/mac the new process is created using spawn, > which does
+>         # not copy the memory. We therefore have to initialize the > new process
+>         # and tell it what the value of mem_id is.
+>         method = 'spawn'
+>         if sys.platform.startswith('linux'):
+>             method = 'fork'
+>         # start a new process for each task, hopefully to reduce > residual
 >         # memory use
->         ctx = multiprocessing.get_context()
->         pool = ctx.Pool(processes=cores, maxtasksperchild=1)
+>         ctx = multiprocessing.get_context(method)
+>         pool = ctx.Pool(processes=cores, maxtasksperchild=1,
+>                         initializer=init, initargs=(mem_id,)
+>                         # ^-pass mem_id to the function 'init' when > creating a new process
+>                         )
 >         try:
->             pool.map_async(make_stars, args, chunksize=1).get(timeout=10_000_000)
+>             pool.map_async(make_stars, args, chunksize=1).get> (timeout=10_000)
 >         except KeyboardInterrupt:
 >             print("Caught kbd interrupt")
 >             pool.close()
@@ -694,7 +714,7 @@ Let's look at how we can do that in another example.
 >         else:
 >             pool.close()
 >             pool.join()
->             # make sure to .copy() or the data will dissappear when you unlink the shared memory
+>             # make sure to .copy() or the data will dissappear when > you unlink the shared memory
 >             local_radec = np.ndarray((2, nsrc), buffer=radec.buf,
 >                                      dtype=np.float64).copy()
 >     finally:
@@ -705,14 +725,14 @@ Let's look at how we can do that in another example.
 >     return local_radec
 > 
 > 
-> 
 > if __name__ == "__main__":
->     ra,dec = get_radec()
->     pos = make_stars_parallel(ra,dec, NSRC, 2)
+>     ra, dec = get_radec()
+>     pos = make_stars_sharemem(ra, dec, NSRC, 2)
 >     # now write these to a csv file for use by my other program
 >     with open('catalog.csv', 'w') as f:
 >         print("id,ra,dec", file=f)
->         np.savetxt(f, np.column_stack((np.arange(NSRC), pos[0,:].T, pos[1,:].T)),fmt='%07d, %12f, %12f')
+>         np.savetxt(f, np.column_stack((np.arange(NSRC), pos[0, :].T, > pos[1, :].T)),fmt='%07d, %12f, %12f')
+> 
 > ~~~
 > {: .language-python}
 {: .solution}
@@ -743,7 +763,7 @@ Below is the process with the main changes in **bold**:
 3. divide the work into groups
   - the number of groups is usually close to an integer multiple of the number of processes
 4. **create some shared memory**
-5. set up a pool of workers (child processes)
+5. **set up a pool of workers (child processes)**
 6. send work teach of the workers
 7. wait for the work to complete
 8. **copy data from shared memory back to local memory and de-allocate the shared memory**
@@ -803,6 +823,41 @@ In our example we use the `job_id` (process number) to figure out where abouts t
 We could have done the above copy without using numpy arrays, but it involves a lot of python loops and there are many opportunities to get the addresses wrong.
 Being able to slice a numpy array makes this easier.
 
+### 5 set up a pool of workers
+Now that we are using shared memory we have a piece of information that is going to be passed to each of the child workers, which is the name (address) of the shared memory.
+There are two ways to do this, either add a new argument to the `make_stars` function (easy!), or use an initializer function (harder but demonstrated for completeness).
+
+In unix based operating systems (including older MacOS) new processes are created using `fork` which means that they are an exact copy of the parent process, and have a copy of the parent memory.
+Unfortunately, Windows and new MacOS, don't support `fork` and instead use `spawn` to create new processes.
+When a new process is `spawn`ed, the memory of the parent is not copied, so we need to do work to copy across the required information.
+Linux also supports spawn, but fork is much faster so we would like to use it if possible.
+
+We create an initializer function called `init` that looks like:
+~~~
+def init(mem):
+    global mem_id
+    mem_id = mem
+    return
+~~~
+{: .language-python}
+
+We decide on the method for creating new processes:
+~~~
+        method = 'spawn'
+        if sys.platform.startswith('linux'):
+            method = 'fork'
+~~~
+{: .language-python}
+
+And then we create a new context manager and pool.
+As we create the pool, we tell it that the initializer function is `init` and that the arguments are the variable `mem_id`:
+~~~
+        ctx = multiprocessing.get_context(method)
+        pool = ctx.Pool(processes=cores, maxtasksperchild=1,
+                        initializer=init, initargs=(mem_id,)
+                        )
+~~~
+{: .language-python}
 
 ### 8 copy data from shared memory back to local memory and de-allocate the shared memory
 Once all the child processes complete, we have all the information that we need in shared memory.

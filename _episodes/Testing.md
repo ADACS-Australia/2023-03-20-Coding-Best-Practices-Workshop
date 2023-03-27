@@ -103,7 +103,7 @@ This way you can keep the test code, but it just wont run.
 > if __name__ == "__main__":
 >     # introspect and run all the functions starting with 'test'
 >     for f in dir():
->         if f.startswith('test'):
+>         if f.startswith('test_'):
 >             print(f)
 >             globals()[f]()
 > ~~~
