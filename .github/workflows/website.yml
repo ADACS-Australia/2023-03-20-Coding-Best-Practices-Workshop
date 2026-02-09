@@ -4,7 +4,6 @@ on:
     branches:
       - gh-pages
       - main
-  pull_request: []
 jobs:
   build-website:
     if: ${{ !endsWith(github.repository, '/styles') }}
